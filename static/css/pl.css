@@ -1,0 +1,455 @@
+/* Стили для страницы P&L отчетов */
+
+/* Основной контейнер — растягиваем на всю высоту */
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+main {
+    flex: 1;
+}
+
+.pl-container {
+    margin-top: 2rem;
+}
+
+/* Сетка карточек — 4 колонки */
+.pl-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+}
+
+/* Карточка — уменьшенная */
+.pl-card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+    overflow: hidden;
+    transition: transform 0.2s;
+}
+
+.pl-card:hover {
+    transform: translateY(-2px);
+}
+
+.pl-card-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 0.5rem 0.75rem;
+}
+
+.pl-card-header h3 {
+    margin: 0;
+    font-size: 0.75rem;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.report-date {
+    font-size: 0.6rem;
+    opacity: 0.8;
+    display: block;
+    margin-top: 0.15rem;
+}
+
+.pl-card-stats {
+    padding: 0.5rem 0.75rem;
+}
+
+.stat-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.2rem 0;
+    border-bottom: 1px solid #f0f0f0;
+    font-size: 0.7rem;
+}
+
+.stat-item:last-child {
+    border-bottom: none;
+}
+
+.stat-item.divider {
+    margin-top: 0.25rem;
+    padding-top: 0.35rem;
+    border-top: 1.5px solid #e9d5ff;
+    font-weight: 600;
+}
+
+.stat-item.profit-item {
+    margin-top: 0.15rem;
+    padding-top: 0.35rem;
+    border-top: 1.5px solid #e9d5ff;
+    font-weight: 600;
+}
+
+.stat-label {
+    color: #666;
+}
+
+.stat-value {
+    font-weight: 500;
+}
+
+.stat-value.revenue {
+    color: #16a34a;
+    font-weight: 600;
+}
+
+.stat-value.expense {
+    color: #dc2626;
+}
+
+.profit-positive {
+    color: #16a34a;
+    font-weight: 700;
+}
+
+.profit-negative {
+    color: #dc2626;
+    font-weight: 700;
+}
+
+.pl-card-footer {
+    padding: 0.5rem 0.75rem;
+    background: #f9fafb;
+    border-top: 1px solid #f0f0f0;
+}
+
+.btn-detail {
+    display: inline-block;
+    background: #9333ea;
+    color: white;
+    padding: 0.25rem 0.75rem;
+    border-radius: 6px;
+    text-decoration: none;
+    font-size: 0.7rem;
+    transition: background 0.2s;
+}
+
+.btn-detail:hover {
+    background: #7e22ce;
+}
+
+/* Стили для блока "нет отчетов" — по центру страницы */
+.no-reports {
+    text-align: center;
+    padding: 3rem;
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+    max-width: 500px;
+    margin: 4rem auto;
+}
+
+.no-reports p {
+    margin-bottom: 1rem;
+    color: #666;
+    font-size: 1rem;
+}
+
+.no-reports .btn {
+    display: inline-block;
+    background: #9333ea;
+    color: white;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    text-decoration: none;
+    margin-top: 1rem;
+    font-size: 0.9rem;
+}
+
+.no-reports .btn:hover {
+    background: #7e22ce;
+}
+
+/* Стили для блока "нет артикулов" (заглушка) */
+.no-articles {
+    text-align: center;
+    padding: 3rem;
+    background: #f9f9f9;
+    border-radius: 16px;
+    max-width: 500px;
+    margin: 4rem auto;
+}
+
+.no-articles p {
+    margin-bottom: 1rem;
+    color: #666;
+    font-size: 1rem;
+}
+
+.no-articles .btn {
+    display: inline-block;
+    background: #9333ea;
+    color: white;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    text-decoration: none;
+    margin-top: 1rem;
+    font-size: 0.9rem;
+}
+
+.no-articles .btn:hover {
+    background: #7e22ce;
+}
+
+/* Панель фильтрации */
+.pl-filters {
+    margin-bottom: 2rem;
+    margin-top: 2rem;
+    padding: 1rem;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.filter-buttons {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.filter-btn {
+    padding: 0.4rem 1.2rem;
+    border: 1px solid #e9d5ff;
+    background: white;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 0.85rem;
+}
+
+.filter-btn.active {
+    background: #9333ea;
+    color: white;
+    border-color: #9333ea;
+}
+
+/* Сводка — оригинальный размер */
+.pl-summary {
+    padding: 1rem;
+    background: #f3e8ff;
+    border-radius: 12px;
+    margin-top: 1rem;
+}
+
+.pl-summary h3 {
+    color: #4c1d95;
+    margin-bottom: 1rem;
+    font-size: 1rem;
+}
+
+.summary-stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.75rem;
+}
+
+.summary-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.5rem 0.75rem;
+    background: white;
+    border-radius: 8px;
+    font-size: 0.85rem;
+}
+
+.summary-item.highlight {
+    background: #9333ea;
+    color: white;
+}
+
+.summary-item.highlight .summary-label,
+.summary-item.highlight .summary-value {
+    color: white;
+    font-weight: 600;
+}
+
+.summary-label {
+    color: #666;
+}
+
+.summary-value {
+    font-weight: 500;
+}
+
+/* Модальное окно — исходный размер (НЕ уменьшаем) */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    background: white;
+    border-radius: 16px;
+    width: 90%;
+    max-width: 500px;
+    max-height: 80vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.modal-header h3 {
+    margin: 0;
+    color: #4c1d95;
+    font-size: 1.1rem;
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: #666;
+}
+
+.modal-body {
+    padding: 1rem 1.25rem;
+    overflow-y: auto;
+    flex: 1;
+}
+
+.quick-select-buttons {
+    display: flex;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+}
+
+.quick-btn {
+    padding: 0.4rem 1rem;
+    background: #f3e8ff;
+    border: 1px solid #e9d5ff;
+    border-radius: 16px;
+    cursor: pointer;
+    font-size: 0.8rem;
+}
+
+.quick-btn:hover {
+    background: #e9d5ff;
+}
+
+.reports-list {
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.report-group {
+    margin-bottom: 1rem;
+}
+
+.group-header {
+    font-weight: 600;
+    color: #4c1d95;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #e9d5ff;
+    font-size: 0.9rem;
+}
+
+.report-checkbox-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0.5rem;
+    cursor: pointer;
+    border-radius: 8px;
+    font-size: 0.85rem;
+}
+
+.report-checkbox-item:hover {
+    background: #f3e8ff;
+}
+
+.report-checkbox-item input {
+    margin: 0;
+}
+
+.report-checkbox-item small {
+    color: #666;
+    font-size: 0.7rem;
+}
+
+.modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    padding: 1rem 1.25rem;
+    border-top: 1px solid #e5e7eb;
+}
+
+.btn-apply {
+    background: #9333ea;
+    color: white;
+    padding: 0.5rem 1.25rem;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.85rem;
+}
+
+.btn-cancel {
+    background: #6b7280;
+    color: white;
+    padding: 0.5rem 1.25rem;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.85rem;
+}
+
+.pl-card-header-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.delete-report-btn {
+    background: #dc2626;
+    border: none;
+    color: white;
+    cursor: pointer;
+    width: 24px;
+    height: 24px;
+    border-radius: 6px;
+    font-size: 12px;
+    transition: background 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.delete-report-btn:hover {
+    background: #b91c1c;
+}
+
+/* Футер внизу */
+.footer {
+    margin-top: 6rem;
+}

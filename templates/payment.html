@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Оплата тарифа {{ tariff }} — MarketEasy</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/payment.css') }}">
+</head>
+<body>
+
+  <!-- Шапка (можно скопировать из pricing или сделать проще) -->
+  <header class="header">
+    <div class="container header__inner">
+      <a href="{{ url_for('index') }}" class="logo">MarketEasy</a>
+      <nav class="nav">
+        <a href="{{ url_for('pricing') }}">← Назад к тарифам</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="payment-container">
+    <h1>Оплата тарифа {{ tariff }}</h1>
+    <h2>{{ price }} ₽ <span>/ месяц</span></h2>
+    
+    <p class="payment-note">
+      После нажатия на кнопку ниже будет имитирована успешная оплата,<br>
+      и тариф активируется.
+    </p>
+  
+    <!-- Кнопка имитации оплаты -->
+    <a href="{{ url_for('payment_success', tariff=tariff.lower()) }}" class="btn-payment">
+      Имитация успешной оплаты
+    </a>
+  
+    <p>
+      <a href="{{ url_for('pricing') }}" class="back-link">← Вернуться к выбору тарифов</a>
+    </p>
+  </main>
+
+  <footer class="footer">
+    <div class="container footer__inner">
+      <div class="footer-left">
+        <a href="{{ url_for('index') }}" class="logo-footer">MarketEasy</a>
+        <p class="footer-description">
+          Простая аналитика для продавцов Wildberries и Ozon
+        </p>
+        <p class="footer-copyright">
+          © 2025 MarketEasy. Все права защищены.
+        </p>
+      </div>
+
+      <div class="footer-links">
+        <h4>Навигация</h4>
+        <ul>
+          <li><a href="{{ url_for('index') }}">Главная</a></li>
+          <li><a href="{{ url_for('pricing2') }}">Тарифы</a></li>
+          <li><a href="{{ url_for('contacts') }}">Контакты</a></li>
+          <li><a href="{{ url_for('about') }}">О нас</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-links">
+        <h4>Поддержка</h4>
+        <ul>
+          <li><a href="#">Помощь</a></li>
+          <li><a href="#">Условия использования</a></li>
+          <li><a href="#">Политика конфиденциальности</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-contact">
+        <h4>Связаться с нами</h4>
+        <p>support@marketeasy.ru</p>
+        <p>+7 (999) 123-45-67</p>
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>

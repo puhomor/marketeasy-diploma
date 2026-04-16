@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>О нас — MarketEasy</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/about.css') }}">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="about-page">
+
+  <header class="header">
+    <div class="container header__inner">
+      <a href="{{ url_for('index') }}" class="logo">MarketEasy</a>
+      <nav class="nav">
+        <a href="{{ url_for('pricing2') }}" {% if request.path == '/pricing2' %}class="active"{% endif %}>Тарифы</a>
+        <a href="{{ url_for('contacts') }}" {% if request.path == '/contacts' %}class="active"{% endif %}>Контакты</a>
+        <a href="{{ url_for('about') }}" {% if request.path == '/about' %}class="active"{% endif %}>О нас</a>
+  
+        {% if 'user_id' in session %}
+        <!-- Авторизованный пользователь -->
+        {% if session.get('has_subscription') %}
+          <a href="{% if session.get('marketplace') == 'wildberries' %}{{ url_for('analytics_wb') }}{% else %}{{ url_for('analytics_ozon') }}{% endif %}" class="btn-login">Личный кабинет</a>
+        {% else %}
+          <a href="{{ url_for('pricing') }}" class="btn-login">Личный кабинет</a>
+        {% endif %}
+          <a href="{{ url_for('logout') }}" class="btn-login">Выйти</a>
+        {% else %}
+          <!-- Неавторизованный -->
+          <a href="{{ url_for('login') }}" class="btn-login">Войти</a>
+          <a href="{{ url_for('register') }}" class="btn-cta">Регистрация</a>
+        {% endif %}
+      </nav>
+    </div>
+  </header>
+
+  <main class="about-main">
+
+    <!-- Герой — большой и чистый -->
+    <section class="about-hero">
+      <div class="container hero-content">
+        <h1>Понятная аналитика<br>для продавцов маркетплейсов</h1>
+        <p class="hero-subtitle">
+          Мы помогаем разобраться, куда уходят ваши деньги на Wildberries и Ozon.<br>
+          Без сложных таблиц — только реальные цифры и выводы.
+        </p>
+        <a href="{{ url_for('register') }}" class="btn-cta large">Попробовать бесплатно</a>
+      </div>
+    </section>
+
+    <!-- Проблема и решение -->
+    <section class="problem-solution">
+      <div class="container ps-grid">
+        <div class="ps-card">
+          <h2>Проблема</h2>
+          <p>Отчёты маркетплейсов — это сотни строк. Трудно понять: сколько реально заработали, где убытки, сколько ушло на комиссии и логистику.</p>
+        </div>
+        <div class="ps-card accent">
+          <h2>Решение</h2>
+          <p>MarketEasy берёт ваш отчёт и показывает всё простыми цифрами: выручка, прибыль, возвраты, топ товаров. За секунды.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Что вы получаете -->
+    <section class="features">
+      <div class="container">
+        <h2>Что показывает анализ</h2>
+        <div class="features-grid">
+          <div class="feature-card">
+            <h3>Выручка и прибыль</h3>
+            <p>Сколько осталось после всех вычетов</p>
+          </div>
+          <div class="feature-card">
+            <h3>Комиссии и логистика</h3>
+            <p>Сколько забрал маркетплейс</p>
+          </div>
+          <div class="feature-card">
+            <h3>Возвраты</h3>
+            <p>Какие товары возвращают и сколько это стоит</p>
+          </div>
+          <div class="feature-card">
+            <h3>Топ товаров</h3>
+            <p>Что приносит прибыль, а что — убытки</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Создатель -->
+    <section class="creator-section">
+      <div class="container creator-grid">
+        <div class="creator-photo">
+          <img src="https://via.placeholder.com/400/cccccc/ffffff?text=Фото+Павла" alt="Павел">
+        </div>
+        <div class="creator-info">
+          <h2>Привет, я Павел — создатель MarketEasy</h2>
+          <p>
+            Сам продаю на Wildberries с 2022 года.<br>
+            Устал часами разбирать отчёты, чтобы понять реальную прибыль.<br><br>
+            Создал этот сервис для себя — теперь делюсь с вами.
+          </p>
+          <p class="creator-quote">
+            "Хочу, чтобы каждый продавец видел свои деньги ясно — без лишней математики."
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Призыв -->
+    <section class="cta-final">
+      <div class="container">
+        <h2>Готовы увидеть реальную картину?</h2>
+        <p>Загрузите отчёт — и получите анализ за секунды</p>
+        <a href="{{ url_for('register') }}" class="btn-cta">Начать бесплатно</a>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="footer">
+    <div class="container footer__inner">
+      <div class="footer-left">
+        <a href="{{ url_for('index') }}" class="logo-footer">MarketEasy</a>
+        <p class="footer-description">
+          Простая аналитика для продавцов Wildberries и Ozon
+        </p>
+        <p class="footer-copyright">
+          © 2025 MarketEasy. Все права защищены.
+        </p>
+      </div>
+
+      <div class="footer-links">
+        <h4>Навигация</h4>
+        <ul>
+          <li><a href="{{ url_for('index') }}">Главная</a></li>
+          <li><a href="{{ url_for('pricing2') }}">Тарифы</a></li>
+          <li><a href="{{ url_for('contacts') }}">Контакты</a></li>
+          <li><a href="{{ url_for('about') }}">О нас</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-links">
+        <h4>Поддержка</h4>
+        <ul>
+          <li><a href="#">Помощь</a></li>
+          <li><a href="#">Условия использования</a></li>
+          <li><a href="#">Политика конфиденциальности</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-contact">
+        <h4>Связаться с нами</h4>
+        <p>support@marketeasy.ru</p>
+        <p>+7 (999) 123-45-67</p>
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>

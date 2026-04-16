@@ -1,0 +1,944 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Аналитика Wildberries — MarketEasy</title>
+        
+    <!-- Общий стиль (структура, шапка, футер, дропдаун) -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+        
+    <!-- Брендовый стиль (цвета) -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/analytics_wb.css') }}">
+</head>
+<body class="analytics-page analytics-wb">
+
+    <header class="header">
+        <div class="container header__inner">
+          <!-- Кнопка меню -->
+          <button class="menu-toggle" id="menuToggle">
+            <span class="hamburger-line"></span>
+            <span class="hamburger-line"></span>
+            <span class="hamburger-line"></span>
+            <span class="menu-label"></span>
+          </button>
+      
+          <!-- Логотип -->
+          <a href="{{ url_for('index') }}" class="logo">MarketEasy</a>
+      
+          <!-- Дропдаун профиля (справа) -->
+          <div class="user-dropdown">
+            <button class="user-button" id="userButton">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                <circle cx="12" cy="7" r="4"></circle>
+              </svg>
+            </button>
+            
+            <div class="dropdown-menu" id="dropdownMenu">
+              <div class="dropdown-item account-info">
+                <strong>Аккаунт</strong><br>
+                <span class="user-email">{{ user_email }}</span>
+              </div>
+              <hr class="dropdown-divider">
+              <a href="{{ url_for('logout') }}" class="dropdown-item logout-btn">Выйти</a>
+            </div>
+          </div>
+        </div>
+    </header>
+      
+    <!-- Боковое меню (ниже хэдера) -->
+    <nav class="sidebar" id="sidebar">
+      <ul class="sidebar-menu">
+          <li><a href="{{ url_for('analytics_wb') }}">Аналитика недельных отчетов</a></li>
+          <li><a href="{{ url_for('unit_economics') }}">Unit-экономика</a></li>
+          <li><a href="{{ url_for('pl') }}">P&L отчеты</a></li>  <!-- НОВЫЙ ПУНКТ -->
+      </ul>
+    </nav>
+    
+
+    <main class="container analytics-main">
+        <h1>Аналитика Wildberries</h1>
+        <p class="subtitle">Загрузите отчёт Wildberries для анализа</p>
+      
+        <!-- Flash-сообщения -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            <div class="flash-messages">
+              {% for category, message in messages %}
+                <div class="alert alert-{{ category }}">{{ message }}</div>
+              {% endfor %}
+            </div>
+          {% endif %}
+        {% endwith %}
+      
+        <!-- Форма загрузки (поддержка 1-2 файлов) -->
+        <div class="upload-section">
+          <form method="POST" enctype="multipart/form-data" action="{{ url_for('analyze_wb') }}">
+            <div class="upload-area">
+              <div class="upload-item">
+                <label class="upload-label">
+                  <input type="file" name="report_files" accept=".xlsx" multiple>
+                  Выбрать файлы (1-2 отчёта)
+                </label>
+                <p class="file-name" id="file-name">Файлы не выбраны</p>
+              </div>
+              <p class="file-hint">* Если за неделю два отчёта — загрузите оба. Система объединит их автоматически.</p>
+            </div>
+
+            <button type="submit" class="btn-analyze">Анализировать</button>
+          </form>
+        </div>
+      
+        <!-- Результат анализа -->
+        {% if analysis_result %}
+          <div class="analysis-result">
+            <h2>Аналитика отчёта</h2>
+            <p class="report-period">Период: {{ analysis_result.period }}</p>
+
+            <!-- Таблица артикулов -->
+            <div class="report-table-container">
+              <h3>Продажи по артикулам</h3>
+              <table class="sales-table" id="salesTable">
+                <thead>
+                  <tr>
+                    <th>Артикул</th>
+                    <th>Название</th>
+                    <th>Выручка</th>
+                    <th>Кол-во</th>
+                    <th>Себестоимость (за ед.)</th>
+                    <th>Себестоимость всего</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for item in analysis_result.articles %}
+                    <tr>
+                      <td>{{ item.article }}</td>
+                      <td>{{ item.name }}</td>
+                      <td>{{ item.revenue | round(0) | int | string | replace(",", " ") }} ₽</td>
+                      <td>{{ item.quantity }}</td>
+                      <td class="cogs-cell">
+                        <div class="cogs-wrapper">
+                          <input type="number" class="cogs-input" data-article="{{ item.article }}" value="0" step="0.01">
+                          <div class="fill-handle"></div>
+                        </div>
+                      </td>
+                      <td class="cogs-total" id="cogs-total-{{ item.article }}">0 ₽</td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Простой расчёт прибыли -->
+            <div class="profit-calculation">
+              <h3>Расчёт прибыли</h3>
+              <table class="profit-table">
+                <thead>
+                  <tr>
+                    <th>Налог (%)</th>
+                    <th>Прочие удержания (₽)</th>
+                    <th>Себестоимость (всего)</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><input type="number" id="taxRate" value="0" step="0.5"></td>
+                    <td><input type="number" id="otherDeductions" value="0" step="0.5"></td>
+                    <td id="totalCogs">0 ₽</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Сводка внизу -->
+            <div class="wb-summary">
+              <h3>Сводка от Wildberries</h3>
+              <table class="summary-table">
+                <tr>
+                  <td>Продажа (с учетом возвратов):</td>
+                  <td><strong>{{ analysis_result.revenue | round(0) | int | string | replace(",", " ") }} ₽</strong></td>
+                </tr>
+                <tr>
+                  <td>К перечислению за товар:</td>
+                  <td>{{ analysis_result.k_perenum | round(2) }} ₽</td>
+                </tr>
+                <tr>
+                  <td>Логистика:</td>
+                  <td>{{ analysis_result.logistics | round(0) | int | string | replace(",", " ") }} ₽</td>
+                </tr>
+                <tr>
+                  <td>Хранение:</td>
+                  <td>{{ analysis_result.storage | round(0) | int | string | replace(",", " ") }} ₽</td>
+                </tr>
+                {% if analysis_result.other_deductions > 0 %}
+                <tr>
+                  <td>Прочие удержания:</td>
+                  <td>{{ analysis_result.other_deductions | round(0) | int | string | replace(",", " ") }} ₽</td>
+                </tr>
+                {% endif %}
+                <tr class="total-row">
+                  <td>Итого к оплате:</td>
+                  <td><strong>{{ analysis_result.itogo_k_oplate | round(2) }} ₽</strong></td>
+                </tr>
+              </table>
+            </div>
+
+            <!-- Расчет чистой прибыли -->
+            <div class="profit-summary">
+              <h3>Расчет чистой прибыли</h3>
+              <div class="profit-summary-grid">
+                <div class="profit-summary-item">
+                  <div class="profit-summary-label">Чистая прибыль (с учетом налога)</div>
+                  <div class="profit-summary-value" id="netProfit">0 ₽</div>
+                </div>
+                <div class="profit-summary-item">
+                  <div class="profit-summary-label">Налог (₽)</div>
+                  <div class="profit-summary-value" id="taxAmount">0 ₽</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Графики в конце страницы -->
+            <div class="charts-section">
+              <h3>Визуализация данных</h3>
+              
+              <div class="charts-container">
+                <!-- График структуры затрат -->
+                <div class="chart-item">
+                  <h4>Структура затрат</h4>
+                  <canvas id="costsChart" width="400" height="300"></canvas>
+                </div>
+                
+                <!-- График топ артикулов -->
+                <div class="chart-item">
+                  <h4>Топ-10 артикулов по выручке</h4>
+                  <canvas id="articlesChart" width="400" height="300"></canvas>
+                </div>
+              </div>
+            </div>
+
+            <!-- Данные для JS -->
+            <div id="data-container"
+            data-report-id="{{ analysis_result.report_id }}"
+            data-revenue="{{ analysis_result.revenue }}"
+            data-logistics="{{ analysis_result.logistics }}"
+            data-storage="{{ analysis_result.storage }}"
+            data-articles="{{ analysis_result.articles|tojson|safe }}"
+            style="display: none;"></div>
+          </div>
+        {% endif %}
+    </main>
+
+    <script src="{{ url_for('static', filename='js/analytics.js') }}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<!--1 дропдаун-->
+<script>
+    // Открытие/закрытие дропдауна
+    const userButton = document.getElementById('userButton');
+    const dropdownMenu = document.getElementById('dropdownMenu');
+
+    userButton.addEventListener('click', (e) => {
+        e.stopPropagation();
+        dropdownMenu.classList.toggle('show');
+    });
+
+    document.addEventListener('click', () => {
+        dropdownMenu.classList.remove('show');
+    });
+
+    dropdownMenu.addEventListener('click', (e) => {
+        e.stopPropagation();
+    });
+</script>
+  
+<!--2 меню-->
+<script>
+    const menuToggle = document.getElementById('menuToggle');
+    const sidebar = document.getElementById('sidebar');
+  
+    menuToggle.addEventListener('click', (e) => {
+      e.stopPropagation();
+      sidebar.classList.toggle('open');
+    });
+  
+    document.addEventListener('click', (e) => {
+      if (!sidebar.contains(e.target) && !menuToggle.contains(e.target)) {
+        sidebar.classList.remove('open');
+      }
+    });
+</script>
+  
+<!--3 имя файла (поддержка нескольких файлов)-->
+<script>
+  // Отображение имен выбранных файлов
+  const fileInput = document.querySelector('input[name="report_files"]');
+  const fileNameDisplay = document.getElementById('file-name');
+  
+  if (fileInput) {
+      fileInput.addEventListener('change', function(e) {
+          const files = e.target.files;
+          let fileNames = [];
+          
+          if (files.length === 0) {
+              fileNameDisplay.textContent = 'Файлы не выбраны';
+          } else {
+              for (let i = 0; i < files.length; i++) {
+                  fileNames.push(files[i].name);
+              }
+              fileNameDisplay.textContent = fileNames.join(', ');
+          }
+      });
+  }
+</script>
+
+<!--4 calculateTotals и графики-->
+<script>
+  const dataContainer = document.getElementById('data-container');
+  
+  if (dataContainer) {
+    const totalRevenue = parseFloat(dataContainer.dataset.revenue) || 0;
+    const totalLogistics = parseFloat(dataContainer.dataset.logistics) || 0;
+    const totalStorage = parseFloat(dataContainer.dataset.storage) || 0;
+    
+    // Получаем значение итого к оплате из DOM
+    const totalRowElement = document.querySelector('.total-row strong');
+    const originalItogoKOplate = totalRowElement ? 
+        parseFloat(totalRowElement.textContent.replace(/[^\d,.-]/g, '').replace(',', '.')) || 0 : 0;
+    
+    let charts = {};
+
+    // Функция для обновления общей выручки по артикулам
+    function updateTotalArticlesRevenue() {
+      let totalArticlesRevenue = 0;
+      document.querySelectorAll('#salesTable tbody tr').forEach(row => {
+          const revenueText = row.cells[2].textContent.replace(/[^\d]/g, '');
+          const revenue = parseFloat(revenueText) || 0;
+          totalArticlesRevenue += revenue;
+      });
+      const totalArticlesRevenueElement = document.getElementById('totalArticlesRevenue');
+      if (totalArticlesRevenueElement) {
+          totalArticlesRevenueElement.textContent = totalArticlesRevenue.toLocaleString('ru-RU') + ' ₽';
+          // Добавляем пояснение
+          totalArticlesRevenueElement.parentElement.previousElementSibling.textContent = 'Выручка по розничным ценам:';
+      }
+    }
+
+    function calculateTotals() {
+      let totalCogs = 0;
+
+      document.querySelectorAll('.cogs-input').forEach(input => {
+        const cogs = parseFloat(input.value) || 0;
+        const quantity = parseInt(input.closest('tr').querySelector('td:nth-child(4)').textContent.trim()) || 1;
+        const cogsTotal = cogs * quantity;
+        totalCogs += cogsTotal;
+
+        const article = input.dataset.article;
+        const cogsCell = document.getElementById('cogs-total-' + article);
+        if (cogsCell) {
+          cogsCell.textContent = cogsTotal.toLocaleString('ru-RU') + ' ₽';
+        }
+      });
+
+      document.getElementById('totalCogs').textContent = totalCogs.toLocaleString('ru-RU') + ' ₽';
+      
+      updateTotalWithDeductionsAndTax(totalCogs);
+      updateCharts(totalCogs);
+      updateTotalArticlesRevenue(); // Обновляем общую выручку по артикулам
+    }
+
+    function updateTotalWithDeductionsAndTax(totalCogs) {
+      const otherDeductions = parseFloat(document.getElementById('otherDeductions').value) || 0;
+      const taxRate = parseFloat(document.getElementById('taxRate').value) || 0;
+      
+      const totalAfterDeductions = originalItogoKOplate - otherDeductions;
+      const taxAmount = totalAfterDeductions * (taxRate / 100);
+      
+      const taxAmountElement = document.getElementById('taxAmount');
+      if (taxAmountElement) {
+        taxAmountElement.textContent = taxAmount.toLocaleString('ru-RU', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' ₽';
+      }
+      
+      const netProfit = totalAfterDeductions - taxAmount - totalCogs;
+      
+      const netProfitElement = document.getElementById('netProfit');
+      if (netProfitElement) {
+        netProfitElement.textContent = netProfit.toLocaleString('ru-RU', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' ₽';
+        netProfitElement.style.color = netProfit >= 0 ? '#16a34a' : '#dc2626';
+      }
+      
+      const totalRowElement = document.querySelector('.total-row strong');
+      if (totalRowElement) {
+        totalRowElement.textContent = totalAfterDeductions.toLocaleString('ru-RU', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' ₽';
+        totalRowElement.style.color = totalAfterDeductions >= 0 ? '' : '#dc2626';
+      }
+    }
+
+    function updateCharts(totalCogs) {
+      const taxRate = parseFloat(document.getElementById('taxRate').value) || 0;
+      const otherDeductions = parseFloat(document.getElementById('otherDeductions').value) || 0;
+      const tax = totalRevenue * (taxRate / 100);
+      
+      const costsData = {
+        labels: ['Налог', 'Логистика', 'Хранение', 'Прочие', 'Себестоимость'],
+        datasets: [{
+          data: [
+            Math.max(tax, 0), 
+            Math.max(totalLogistics, 0), 
+            Math.max(totalStorage, 0), 
+            Math.max(otherDeductions, 0), 
+            Math.max(totalCogs, 0)
+          ],
+          backgroundColor: ['#FFD93D', '#4ECDC4', '#45B7D1', '#96CEB4', '#F7A278'],
+          borderColor: '#ffffff',
+          borderWidth: 1
+        }]
+      };
+
+      const articles = [];
+      document.querySelectorAll('#salesTable tbody tr').forEach(row => {
+        const revenueText = row.cells[2].textContent.replace(/[^\d]/g, '');
+        const revenue = parseFloat(revenueText) || 0;
+        if (revenue > 0) {
+          articles.push({
+            article: row.cells[0].textContent.trim(),
+            name: row.cells[1].textContent.trim(),
+            revenue: revenue
+          });
+        }
+      });
+      
+      articles.sort((a, b) => b.revenue - a.revenue);
+      const topArticles = articles.slice(0, 10);
+      
+      const articleLabels = topArticles.map(item => 
+        item.article.length > 10 ? item.article.substring(0, 8) + '...' : item.article
+      );
+      const articleRevenues = topArticles.map(item => item.revenue);
+
+      const costsCtx = document.getElementById('costsChart');
+      const articlesCtx = document.getElementById('articlesChart');
+      
+      if (costsCtx && articlesCtx) {
+        if (charts.costs) charts.costs.destroy();
+        if (charts.articles) charts.articles.destroy();
+        
+        charts.costs = new Chart(costsCtx, {
+          type: 'doughnut',
+          data: costsData,
+          options: { responsive: true, maintainAspectRatio: false }
+        });
+        
+        charts.articles = new Chart(articlesCtx, {
+          type: 'bar',
+          data: {
+            labels: articleLabels,
+            datasets: [{
+              label: 'Выручка (₽)',
+              data: articleRevenues,
+              backgroundColor: '#9333ea'
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+              y: {
+                beginAtZero: true,
+                ticks: { callback: function(value) { return value.toLocaleString('ru-RU') + ' ₽'; } }
+              }
+            }
+          }
+        });
+      }
+    }
+
+    // Обработчики для полей
+    const otherDeductionsInput = document.getElementById('otherDeductions');
+    const taxRateInput = document.getElementById('taxRate');
+    
+    if (otherDeductionsInput) {
+      otherDeductionsInput.addEventListener('input', calculateTotals);
+    }
+    if (taxRateInput) {
+      taxRateInput.addEventListener('input', calculateTotals);
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      setTimeout(calculateTotals, 300);
+    });
+    
+    document.querySelectorAll('.cogs-input, #taxRate, #otherDeductions').forEach(el => {
+      if (el) el.addEventListener('input', calculateTotals);
+    });
+  }
+</script>
+  
+<!--5 drag & drop-->
+<script>
+  let isDragging = false;
+  let startValue = 0;
+
+  document.querySelectorAll('.cogs-wrapper').forEach(wrapper => {
+    const input = wrapper.querySelector('.cogs-input');
+    const handle = wrapper.querySelector('.fill-handle');
+
+    handle.addEventListener('mousedown', (e) => {
+      e.preventDefault();
+      isDragging = true;
+      startValue = parseFloat(input.value) || 0;
+      document.body.classList.add('dragging');
+    });
+
+    wrapper.addEventListener('mouseenter', () => {
+      if (isDragging) {
+        input.value = startValue;
+        input.dispatchEvent(new Event('input'));
+      }
+    });
+  });
+
+  document.addEventListener('mouseup', () => {
+    if (isDragging) {
+      isDragging = false;
+      document.body.classList.remove('dragging');
+      calculateTotals();
+    }
+  });
+
+  document.querySelectorAll('.fill-handle').forEach(handle => {
+    handle.addEventListener('touchstart', (e) => {
+      e.preventDefault();
+      const wrapper = handle.closest('.cogs-wrapper');
+      const input = wrapper.querySelector('.cogs-input');
+      isDragging = true;
+      startValue = parseFloat(input.value) || 0;
+    });
+  });
+
+  document.addEventListener('touchend', () => {
+    if (isDragging) {
+      isDragging = false;
+      calculateTotals();
+    }
+  });
+</script>
+  
+<!--6 фокус на cogs-input-->
+<script>
+  document.querySelectorAll('.cogs-input').forEach(input => {
+    input.addEventListener('focus', function() {
+      if (this.value === '0' || this.value === '0.00' || this.value === '0.0') {
+        this.value = '';
+      }
+    });
+
+    input.addEventListener('blur', function() {
+      if (this.value === '' || this.value === null) {
+        this.value = '0';
+      }
+      calculateTotals();
+    });
+
+    input.addEventListener('input', calculateTotals);
+  });
+</script>
+  
+<!--7 фокус на taxRate/otherDeductions-->
+<script>
+  const rateInputs = ['taxRate', 'otherDeductions'];
+
+  rateInputs.forEach(id => {
+    const input = document.getElementById(id);
+    if (input) {
+      input.addEventListener('focus', function() {
+        if (this.value === '0' || this.value === '0.0' || this.value === '0.00') {
+          this.value = '';
+        }
+      });
+
+      input.addEventListener('blur', function() {
+        if (this.value === '' || this.value === null) {
+          this.value = '0';
+        }
+        calculateTotals();
+      });
+
+      input.addEventListener('input', calculateTotals);
+    }
+  });
+</script>
+  
+<!--8 сохранение (налог, прочие, себестоимость)-->
+<script>
+  // Получаем report_id из data-container (используем существующую переменную dataContainer)
+  // Переменная dataContainer уже объявлена в предыдущем скрипте, не объявляем её заново
+  const reportId = typeof dataContainer !== 'undefined' && dataContainer ? parseInt(dataContainer.dataset.reportId) : null;
+  
+  // Функция сохранения налога
+  function saveTax() {
+      if (!reportId) {
+          console.log('Нет report_id, сохранение налога невозможно');
+          return;
+      }
+      
+      const taxRate = parseFloat(document.getElementById('taxRate').value) || 0;
+      const otherDeductions = parseFloat(document.getElementById('otherDeductions').value) || 0;
+      
+      fetch('/save_pl', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+              tax_rate: taxRate,
+              other_deductions: otherDeductions,
+              report_id: reportId
+          })
+      })
+      .then(response => response.json())
+      .then(data => {
+          if (data.success && data.pl_data) {
+              const taxAmountElement = document.getElementById('taxAmount');
+              const netProfitElement = document.getElementById('netProfit');
+              
+              if (taxAmountElement) {
+                  taxAmountElement.textContent = data.pl_data.tax_amount.toLocaleString('ru-RU', { minimumFractionDigits: 2 }) + ' ₽';
+              }
+              if (netProfitElement) {
+                  netProfitElement.textContent = data.pl_data.net_profit.toLocaleString('ru-RU', { minimumFractionDigits: 2 }) + ' ₽';
+                  netProfitElement.style.color = data.pl_data.net_profit >= 0 ? '#16a34a' : '#dc2626';
+              }
+              showNotification('✓ Налог сохранен', 'success');
+          }
+      })
+      .catch(error => console.error('Ошибка сохранения налога:', error));
+  }
+  
+  // Функция сохранения прочих удержаний
+  function saveOtherDeductions() {
+      if (!reportId) {
+          console.log('Нет report_id, сохранение прочих удержаний невозможно');
+          return;
+      }
+      
+      const taxRate = parseFloat(document.getElementById('taxRate').value) || 0;
+      const otherDeductions = parseFloat(document.getElementById('otherDeductions').value) || 0;
+      
+      fetch('/save_pl', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+              tax_rate: taxRate,
+              other_deductions: otherDeductions,
+              report_id: reportId
+          })
+      })
+      .then(response => response.json())
+      .then(data => {
+          if (data.success && data.pl_data) {
+              const taxAmountElement = document.getElementById('taxAmount');
+              const netProfitElement = document.getElementById('netProfit');
+              
+              if (taxAmountElement) {
+                  taxAmountElement.textContent = data.pl_data.tax_amount.toLocaleString('ru-RU', { minimumFractionDigits: 2 }) + ' ₽';
+              }
+              if (netProfitElement) {
+                  netProfitElement.textContent = data.pl_data.net_profit.toLocaleString('ru-RU', { minimumFractionDigits: 2 }) + ' ₽';
+                  netProfitElement.style.color = data.pl_data.net_profit >= 0 ? '#16a34a' : '#dc2626';
+              }
+              showNotification('✓ Прочие удержания сохранены', 'success');
+          }
+      })
+      .catch(error => console.error('Ошибка сохранения прочих удержаний:', error));
+  }
+  
+  // Функция сохранения себестоимости с обновлением P&L
+  function saveCostsWithPL() {
+      if (!reportId) {
+          console.log('Нет report_id, сохранение себестоимости невозможно');
+          return;
+      }
+      
+      const articles = [];
+      document.querySelectorAll('.cogs-input').forEach(input => {
+          articles.push({
+              article: input.dataset.article,
+              cost: parseFloat(input.value) || 0
+          });
+      });
+      
+      const taxRate = parseFloat(document.getElementById('taxRate').value) || 0;
+      const otherDeductions = parseFloat(document.getElementById('otherDeductions').value) || 0;
+      
+      fetch('/save_costs', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+              articles: articles,
+              report_id: reportId,
+              tax_rate: taxRate,
+              other_deductions: otherDeductions
+          })
+      })
+      .then(response => response.json())
+      .then(data => {
+          if (data.success) {
+              showNotification('✓ Себестоимость сохранена', 'success');
+              
+              if (data.pl_data) {
+                  const taxAmountElement = document.getElementById('taxAmount');
+                  const netProfitElement = document.getElementById('netProfit');
+                  const totalCogsElement = document.getElementById('totalCogs');
+                  
+                  if (taxAmountElement) {
+                      taxAmountElement.textContent = data.pl_data.tax_amount.toLocaleString('ru-RU', { minimumFractionDigits: 2 }) + ' ₽';
+                  }
+                  if (netProfitElement) {
+                      netProfitElement.textContent = data.pl_data.net_profit.toLocaleString('ru-RU', { minimumFractionDigits: 2 }) + ' ₽';
+                      netProfitElement.style.color = data.pl_data.net_profit >= 0 ? '#16a34a' : '#dc2626';
+                  }
+                  if (totalCogsElement && data.pl_data.total_cogs !== undefined) {
+                      totalCogsElement.textContent = data.pl_data.total_cogs.toLocaleString('ru-RU', { minimumFractionDigits: 2 }) + ' ₽';
+                  }
+              }
+          }
+      })
+      .catch(error => console.error('Ошибка:', error));
+  }
+  
+  // Уведомление
+  function showNotification(message, type) {
+      const notification = document.createElement('div');
+      notification.textContent = message;
+      notification.style.position = 'fixed';
+      notification.style.bottom = '20px';
+      notification.style.right = '20px';
+      notification.style.backgroundColor = type === 'success' ? '#4CAF50' : '#f44336';
+      notification.style.color = 'white';
+      notification.style.padding = '10px 20px';
+      notification.style.borderRadius = '5px';
+      notification.style.zIndex = '1000';
+      notification.style.animation = 'fadeInOut 2s';
+      document.body.appendChild(notification);
+      setTimeout(() => notification.remove(), 2000);
+  }
+  
+  // Добавляем обработчики после загрузки страницы
+  document.addEventListener('DOMContentLoaded', function() {
+      const taxRateInput = document.getElementById('taxRate');
+      const otherDeductionsInput = document.getElementById('otherDeductions');
+      
+      // Сохраняем налог при вводе (с задержкой) - УБРАЛ blur, оставил только input с задержкой
+      if (taxRateInput) {
+          let taxTimeout;
+          taxRateInput.addEventListener('input', function() {
+              clearTimeout(taxTimeout);
+              taxTimeout = setTimeout(saveTax, 1500);
+          });
+      }
+      
+      // Сохраняем прочие удержания при вводе (с задержкой) - УБРАЛ blur, оставил только input с задержкой
+      if (otherDeductionsInput) {
+          let otherTimeout;
+          otherDeductionsInput.addEventListener('input', function() {
+              clearTimeout(otherTimeout);
+              otherTimeout = setTimeout(saveOtherDeductions, 1500);
+          });
+      }
+      
+      // Сохраняем себестоимость при вводе (с задержкой) - УБРАЛ blur, оставил только input с задержкой
+      document.querySelectorAll('.cogs-input').forEach(input => {
+          let costTimeout;
+          input.addEventListener('input', function() {
+              clearTimeout(costTimeout);
+              costTimeout = setTimeout(saveCostsWithPL, 1500);
+          });
+      });
+  });
+  
+  // Добавляем стиль для анимации
+  const style = document.createElement('style');
+  style.textContent = `
+      @keyframes fadeInOut {
+          0% { opacity: 0; transform: translateY(20px); }
+          15% { opacity: 1; transform: translateY(0); }
+          85% { opacity: 1; transform: translateY(0); }
+          100% { opacity: 0; transform: translateY(20px); }
+      }
+  `;
+  document.head.appendChild(style);
+</script>
+
+<!--9 загрузка сохраненных данных-->
+<script>
+  // Функция для загрузки данных из БД по report_id из сессии
+  function loadSavedReport() {
+      // Проверяем, есть ли report_id в data-container
+      const dataContainerElem = document.getElementById('data-container');
+      const reportId = dataContainerElem ? parseInt(dataContainerElem.dataset.reportId) : null;
+      
+      if (reportId && !dataContainerElem.dataset.loaded) {
+          // Отмечаем, что уже загружали
+          dataContainerElem.dataset.loaded = 'true';
+          
+          fetch(`/get_report/${reportId}`)
+              .then(response => response.json())
+              .then(data => {
+                  if (data.success) {
+                      // Заполняем поля налога и прочих удержаний
+                      const taxRateInput = document.getElementById('taxRate');
+                      const otherDeductionsInput = document.getElementById('otherDeductions');
+                      
+                      if (taxRateInput && data.report.tax_amount > 0) {
+                          // Вычисляем процент налога из tax_amount и itogo_k_oplate
+                          const taxRate = data.report.itogo_k_oplate > 0 
+                              ? (data.report.tax_amount / data.report.itogo_k_oplate * 100) 
+                              : 0;
+                          taxRateInput.value = taxRate.toFixed(2);
+                      }
+                      
+                      if (otherDeductionsInput && data.report.other_deductions) {
+                          otherDeductionsInput.value = data.report.other_deductions;
+                      }
+                      
+                      // Заполняем поля себестоимости для артикулов
+                      data.articles.forEach(article => {
+                          const costInput = document.querySelector(`.cogs-input[data-article="${article.article}"]`);
+                          if (costInput && article.cost) {
+                              costInput.value = article.cost;
+                              // Обновляем отображение общей себестоимости
+                              const quantity = parseInt(costInput.closest('tr').querySelector('td:nth-child(4)').textContent.trim()) || 1;
+                              const cogsTotal = article.cost * quantity;
+                              const cogsCell = document.getElementById(`cogs-total-${article.article}`);
+                              if (cogsCell) {
+                                  cogsCell.textContent = cogsTotal.toLocaleString('ru-RU') + ' ₽';
+                              }
+                          }
+                      });
+                      
+                      // Пересчитываем итоги
+                      if (typeof calculateTotals === 'function') {
+                          calculateTotals();
+                      }
+                      loadSavedCostsForArticles();
+                      showNotification('Загружен последний отчет', 'success');
+                  }
+              })
+              .catch(error => console.error('Ошибка загрузки отчета:', error));
+      }
+  }
+  
+  // Вызываем загрузку после загрузки DOM
+  document.addEventListener('DOMContentLoaded', function() {
+      setTimeout(loadSavedReport, 500);
+  });
+</script>
+
+<!--10 загрузка сохраненных себестоимостей для новых отчетов-->
+<script>
+  // Функция для загрузки сохраненных себестоимостей для артикулов
+  function loadSavedCostsForArticles() {
+      // Собираем все артикулы из таблицы
+      const articles = [];
+      document.querySelectorAll('.cogs-input').forEach(input => {
+          articles.push(input.dataset.article);
+      });
+      
+      if (articles.length === 0) return;
+      
+      fetch('/get_saved_costs', {
+          method: 'POST',
+          headers: {
+              'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ articles: articles })
+      })
+      .then(response => response.json())
+      .then(data => {
+          if (data.success && data.costs) {
+              let hasUpdates = false;
+              // Заполняем поля себестоимости, если есть сохраненные значения
+              document.querySelectorAll('.cogs-input').forEach(input => {
+                  const article = input.dataset.article;
+                  if (data.costs[article] && parseFloat(input.value) === 0) {
+                      input.value = data.costs[article];
+                      hasUpdates = true;
+                      // Подсвечиваем поле зеленым
+                      input.style.backgroundColor = '#e8f5e9';
+                      setTimeout(() => {
+                          input.style.backgroundColor = '';
+                      }, 1000);
+                  }
+              });
+              
+              if (hasUpdates) {
+                  // Пересчитываем итоги
+                  if (typeof calculateTotals === 'function') {
+                      calculateTotals();
+                  }
+                  showNotification('✓ Автоматически подставлены сохраненные себестоимости', 'success');
+              }
+          }
+      })
+      .catch(error => console.error('Ошибка загрузки сохраненных себестоимостей:', error));
+  }
+  
+  // Вызываем загрузку после того, как таблица отрисовалась
+  // Добавляем в DOMContentLoaded или в setTimeout после загрузки отчета
+  if (typeof document !== 'undefined') {
+      // Если страница уже загружена и есть таблица
+      if (document.querySelector('.cogs-input')) {
+          setTimeout(loadSavedCostsForArticles, 100);
+      }
+      // Наблюдатель за появлением таблицы (для динамической загрузки)
+      const observer = new MutationObserver(function(mutations) {
+          if (document.querySelector('.cogs-input') && !window._costsLoaded) {
+              window._costsLoaded = true;
+              setTimeout(loadSavedCostsForArticles, 200);
+          }
+      });
+      observer.observe(document.body, { childList: true, subtree: true });
+  }
+</script>
+
+<footer class="footer">
+  <div class="container footer__inner">
+    <div class="footer-left">
+      <a href="{{ url_for('index') }}" class="logo-footer">MarketEasy</a>
+      <p class="footer-description">
+        Простая аналитика для продавцов Wildberries и Ozon
+      </p>
+      <p class="footer-copyright">
+        © 2026 MarketEasy. Все права защищены.
+      </p>
+    </div>
+
+    <div class="footer-links">
+      <h4>Навигация</h4>
+      <ul>
+        <li><a href="{{ url_for('index') }}">Главная</a></li>
+        <li><a href="{{ url_for('pricing2') }}">Тарифы</a></li>
+        <li><a href="{{ url_for('contacts') }}">Контакты</a></li>
+        <li><a href="{{ url_for('about') }}">О нас</a></li>
+      </ul>
+    </div>
+
+    <div class="footer-links">
+      <h4>Поддержка</h4>
+      <ul>
+        <li><a href="#">Помощь</a></li>
+        <li><a href="#">Условия использования</a></li>
+        <li><a href="#">Политика конфиденциальности</a></li>
+      </ul>
+    </div>
+
+    <div class="footer-contact">
+      <h4>Связаться с нами</h4>
+      <p>support@marketeasy.ru</p>
+      <p>+7 (999) 123-45-67</p>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

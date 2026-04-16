@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Тарифы — MarketEasy</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/pricing.css') }}">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="pricing-page">
+
+  <!-- Шапка -->
+  <header class="header">
+    <div class="container header__inner">
+      <a href="{{ url_for('index') }}" class="logo">MarketEasy</a>
+      <nav class="nav">
+        <a href="{{ url_for('index') }}" class="btn-login">Выйти</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Тарифы -->
+  <main class="pricing-container">
+    <div class="container">
+      <h1 class="pricing-title">Выберите тариф</h1>
+      <p class="pricing-subtitle">Начните с бесплатного тарифа или выберите подходящий план</p>
+
+      <div class="pricing-grid">
+        <!-- Бесплатный -->
+        <div class="pricing-card">
+          <h3>Бесплатный</h3>
+          <p class="price">0 ₽ <span>/ месяц</span></p>
+          <ul class="features">
+            <li>До 3 отчётов</li>
+            <li>Базовый анализ</li>
+          </ul>
+          <a href="{{ url_for('choose_tariff', tariff='free') }}" class="btn-pricing">Выбрать бесплатно</a>
+        </div>
+
+        <!-- Стандарт -->
+        <div class="pricing-card recommended">
+          <div class="recommended-badge">Рекомендуем</div>
+          <h3>Стандарт</h3>
+          <p class="price">3000 ₽ <span>/ месяц</span></p>
+          <ul class="features">
+            <li>До 15 отчётов</li>
+            <li>Расширенный анализ</li>
+            <li>Приоритетная поддержка</li>
+          </ul>
+          <a href="{{ url_for('choose_tariff', tariff='standard') }}" class="btn-pricing">Выбрать тариф</a>
+        </div>
+
+        <!-- Премиум -->
+        <div class="pricing-card">
+          <h3>Премиум</h3>
+          <p class="price">5000 ₽ <span>/ месяц</span></p>
+          <ul class="features">
+            <li>До 40 отчётов</li>
+            <li>Полный анализ</li>
+            <li>Персональный менеджер</li>
+          </ul>
+          <a href="{{ url_for('choose_tariff', tariff='premium') }}" class="btn-pricing">Выбрать тариф</a>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="container footer__inner">
+      <div class="footer-left">
+        <a href="{{ url_for('index') }}" class="logo-footer">MarketEasy</a>
+        <p class="footer-description">
+          Простая аналитика для продавцов Wildberries и Ozon
+        </p>
+        <p class="footer-copyright">
+          © 2025 MarketEasy. Все права защищены.
+        </p>
+      </div>
+
+      <div class="footer-links">
+        <h4>Навигация</h4>
+        <ul>
+          <li><a href="{{ url_for('index') }}">Главная</a></li>
+          <li><a href="{{ url_for('pricing2') }}">Тарифы</a></li>
+          <li><a href="{{ url_for('contacts') }}">Контакты</a></li>
+          <li><a href="{{ url_for('about') }}">О нас</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-links">
+        <h4>Поддержка</h4>
+        <ul>
+          <li><a href="#">Помощь</a></li>
+          <li><a href="#">Условия использования</a></li>
+          <li><a href="#">Политика конфиденциальности</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-contact">
+        <h4>Связаться с нами</h4>
+        <p>support@marketeasy.ru</p>
+        <p>+7 (999) 123-45-67</p>
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>

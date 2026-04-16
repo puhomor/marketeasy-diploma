@@ -1,0 +1,570 @@
+/* Аналитика Wildberries — фиолетовый дизайн */
+body.analytics-wb {
+  --primary: #9333ea;
+  --primary-light: #f3e8ff;
+}
+
+body.analytics-wb .header {
+  background: white;
+  border-bottom: 1px solid var(--primary-light);
+}
+
+body.analytics-wb .user-button svg {
+  stroke: var(--primary);
+}
+
+body.analytics-wb h1 {
+  color: #4c1d95;
+}
+
+body.analytics-wb .subtitle {
+  color: #6b21a8;
+}
+
+body.analytics-wb .btn-analyze {
+  background: var(--primary);
+  color: white;
+  border: none;
+  padding: 1rem 3rem;
+  font-size: 20px;
+  border-radius: 50px;
+  cursor: pointer;
+}
+
+/* Боковое меню */
+.sidebar {
+  position: fixed;
+  top: 80px;
+  left: -300px;
+  width: 300px;
+  height: calc(100vh - 80px);
+  background: #9333ea;
+  z-index: 999;
+  padding-top: 2rem;
+}
+
+.sidebar.open {
+  left: 0;
+}
+
+.sidebar-menu {
+  list-style: none;
+}
+
+.sidebar-menu li {
+  margin: 1rem 0;
+}
+
+.sidebar-menu a {
+  color: white;
+  text-decoration: none;
+  font-size: 18px;
+  padding: 1rem 2rem;
+  display: block;
+}
+
+/* Кнопка меню */
+.menu-toggle {
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  margin-right: 2rem;
+}
+
+.hamburger-line {
+  width: 28px;
+  height: 3px;
+  background: #333;
+  border-radius: 2px;
+}
+
+.upload-section {
+  max-width: 800px;
+  margin: 3rem auto;
+  padding: 3rem;
+  background: var(--primary-light);
+  border-radius: 20px;
+  text-align: center;
+}
+
+.upload-label {
+  display: block;
+  padding: 3rem;
+  border: 3px dashed var(--primary);
+  border-radius: 16px;
+  cursor: pointer;
+  background: white;
+}
+
+.upload-icon {
+  font-size: 48px;
+  display: block;
+  margin-bottom: 1rem;
+}
+
+.upload-text {
+  font-size: 18px;
+  color: #4c1d95;
+}
+
+input[type="file"] {
+  display: none;
+}
+
+/* Результат анализа */
+.analysis-result {
+  margin-top: 4rem;
+  padding: 2rem;
+  background: white;
+  border-radius: 20px;
+}
+
+.metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2rem;
+  margin: 3rem 0;
+}
+
+.metric-card {
+  background: var(--primary-light);
+  padding: 2rem;
+  border-radius: 16px;
+  text-align: center;
+}
+
+.metric-card h3 {
+  color: #4c1d95;
+  margin-bottom: 1rem;
+}
+
+.metric-value {
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--primary);
+}
+
+.table-container {
+  overflow-x: auto;
+  margin-top: 2rem;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+}
+
+th, td {
+  padding: 12px;
+  text-align: left;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+th {
+  background: var(--primary-light);
+  color: #4c1d95;
+}
+
+.flash-messages {
+  max-width: 800px;
+  margin: 2rem auto;
+}
+
+.analysis-header {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.analysis-header h2 {
+  margin: 0;
+}
+
+.charts-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  margin: 3rem 0;
+}
+
+.chart-card {
+  background: white;
+  padding: 2rem;
+  border-radius: 20px;
+  text-align: center;
+}
+
+.chart-card h3 {
+  margin-bottom: 1.5rem;
+  color: #4c1d95;
+}
+
+/* Протягивание себестоимости */
+.cogs-input {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  text-align: right;
+}
+
+.fill-handle {
+  position: absolute;
+  bottom: 2px;
+  right: 2px;
+  width: 8px;
+  height: 8px;
+  background: #2e7d32;
+  cursor: crosshair;
+  border-radius: 1px;
+}
+
+#commissionRate,
+#taxRate,
+#otherDeductions {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  text-align: right;
+}
+
+/* Сводка Wildberries */
+.wb-official-summary {
+  margin: 4rem 0;
+  padding: 3rem;
+  background: #f8f5ff;
+  border-radius: 24px;
+}
+
+.wb-official-summary h2 {
+  text-align: center;
+  margin: 0 0 2rem 0;
+  color: #4c1d95;
+  font-size: 28px;
+}
+
+.wb-official-summary .metric-card.highlight {
+  grid-column: span 2;
+  background: var(--primary);
+  color: white;
+}
+
+.wb-official-summary .metric-card.highlight h3 {
+  color: white;
+}
+
+.wb-official-summary .metric-card.highlight .metric-value {
+  color: white;
+}
+
+/* Дропдаун пользователя */
+.user-dropdown {
+  position: relative;
+}
+
+.dropdown-menu {
+  display: none;
+  position: absolute;
+  top: 100%;
+  right: 0;
+  min-width: 200px;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 0;
+  margin-top: 5px;
+  z-index: 1000;
+}
+
+.dropdown-menu.show {
+  display: block;
+}
+
+.dropdown-item {
+  display: block;
+  padding: 8px 16px;
+  color: #333;
+  text-decoration: none;
+}
+
+.account-info {
+  padding: 8px 16px;
+  border-bottom: 1px solid #eee;
+}
+
+.account-info .user-email {
+  color: #666;
+  font-size: 14px;
+}
+
+.logout-btn {
+  color: #d00;
+}
+
+.dropdown-divider {
+  height: 1px;
+  background: #eee;
+  margin: 0;
+  border: none;
+}
+
+.user-button {
+  background: none;
+  border: none;
+  padding: 8px;
+  cursor: pointer;
+}
+
+/* Протягивание себестоимости как в Excel */
+.cogs-cell {
+  position: relative;
+}
+
+.cogs-wrapper {
+  position: relative;
+}
+
+.cogs-input {
+  width: 100%;
+  padding: 8px 24px 8px 8px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  text-align: right;
+}
+
+.fill-handle {
+  position: absolute;
+  bottom: 2px;
+  right: 2px;
+  width: 8px;
+  height: 8px;
+  background: #2e7d32;
+  cursor: crosshair;
+  border-radius: 1px;
+  opacity: 0;
+}
+
+.cogs-wrapper:hover .fill-handle,
+.cogs-wrapper.dragging .fill-handle {
+  opacity: 1;
+}
+
+/* Курсор при перетаскивании */
+body.dragging {
+  cursor: crosshair !important;
+}
+
+/* Стили для графиков */
+.charts-section {
+  margin-top: 3rem;
+  padding: 2rem;
+  background: #f9f9f9;
+  border-radius: 10px;
+}
+
+.charts-container {
+  display: flex;
+  gap: 2rem;
+  flex-wrap: wrap;
+}
+
+.chart-item {
+  flex: 1;
+  min-width: 300px;
+  background: white;
+  padding: 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.chart-item h4 {
+  margin-bottom: 1rem;
+  text-align: center;
+  color: #333;
+}
+
+.chart-item canvas {
+  width: 100% !important;
+  height: 300px !important;
+}
+
+.footer {
+  margin-top: 255px;
+}
+
+/* Блок расчета чистой прибыли */
+.profit-summary {
+  margin: 2rem 0;
+  padding: 2rem;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+  border: 1px solid var(--primary-light);
+}
+
+.profit-summary h3 {
+  color: #4c1d95;
+  margin-bottom: 1.5rem;
+  font-size: 20px;
+}
+
+.profit-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 2rem;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.profit-summary-item {
+  text-align: center;
+  padding: 1.5rem;
+  border-radius: 12px;
+}
+
+.profit-summary-label {
+  color: #4c1d95;
+  font-size: 14px;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.profit-summary-value {
+  color: var(--primary);
+  font-size: 28px;
+  font-weight: 700;
+}
+
+/* Стиль для подсказки о нескольких файлах */
+.file-hint {
+  font-size: 12px;
+  color: #6b7280;
+  margin-top: 5px;
+}
+
+/* Стили для загрузки нескольких файлов */
+.upload-area {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.upload-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.upload-label {
+  background-color: #f3e8ff;
+  border: 1px solid #e9d5ff;
+  border-radius: 8px;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.upload-label:hover {
+  background-color: #e9d5ff;
+}
+
+.upload-label input {
+  display: none;
+}
+
+.file-name {
+  color: #666;
+  font-size: 14px;
+  margin: 0;
+}
+
+.upload-actions {
+  margin-top: 1rem;
+}
+
+.upload-status {
+  margin-top: 1rem;
+  padding: 0.75rem;
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+.upload-status.success {
+  background-color: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+.upload-status.warning {
+  background-color: #fff3cd;
+  color: #856404;
+  border: 1px solid #ffeeba;
+}
+
+.status-info {
+  display: inline-block;
+}
+
+.btn-analyze:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Стили для загрузки нескольких файлов */
+.upload-area {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.upload-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.upload-label {
+  background-color: #f3e8ff;
+  border: 1px solid #e9d5ff;
+  border-radius: 8px;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.upload-label:hover {
+  background-color: #e9d5ff;
+}
+
+.upload-label input {
+  display: none;
+}
+
+.file-name {
+  color: #666;
+  font-size: 14px;
+  margin: 0;
+}
+
+.file-hint {
+  font-size: 12px;
+  color: #6b7280;
+  margin-top: 5px;
+}
+
+.footer {
+  margin-top: 19rem;
+}

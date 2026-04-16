@@ -1,0 +1,85 @@
+/* payment.css — стили только для страницы оплаты */
+
+.payment-page {
+    background: #f8fafc;
+    min-height: 100vh;
+  }
+  
+  .payment-container {
+    padding-top: 140px;
+    padding-bottom: 100px;
+    text-align: center;
+  }
+  
+  .payment-container h1 {
+    font-size: 48px;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 1rem;
+  }
+  
+  .payment-container h2 {
+    font-size: 36px;
+    color: #2e7d32;
+    margin: 2rem 0;
+  }
+  
+  .payment-container h2 span {
+    font-size: 20px;
+    color: #666;
+    font-weight: normal;
+  }
+  
+  .payment-note {
+    font-size: 18px;
+    color: #666;
+    margin-bottom: 3rem;
+    line-height: 1.6;
+  }
+  
+  .btn-payment {
+    display: inline-block;
+    background: #2e7d32;
+    color: white;
+    padding: 1.2rem 3rem;
+    font-size: 20px;
+    font-weight: 600;
+    border-radius: 50px;
+    text-decoration: none;
+    box-shadow: 0 8px 25px rgba(46, 125, 50, 0.3);
+    transition: all 0.3s;
+  }
+  
+  .btn-payment:hover {
+    background: #256f2a;
+    transform: translateY(-4px);
+    box-shadow: 0 12px 30px rgba(46, 125, 50, 0.4);
+  }
+  
+  .back-link {
+    display: inline-block;
+    margin-top: 3rem;
+    color: #666;
+    font-size: 16px;
+    text-decoration: none;
+  }
+  
+  .back-link:hover {
+    text-decoration: underline;
+  }
+  
+  /* Адаптив */
+  @media (max-width: 768px) {
+    .payment-container h1 {
+      font-size: 36px;
+    }
+    
+    .payment-container h2 {
+      font-size: 30px;
+    }
+    
+    .btn-payment {
+      padding: 1rem 2.5rem;
+      font-size: 18px;
+    }
+  }

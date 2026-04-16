@@ -1,0 +1,134 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  color: #333;
+  background: #fff;
+  line-height: 1.6;
+}
+
+.container {
+  width: min(90%, 1240px);
+  margin: 0 auto;
+}
+
+/* Хедер для всех страниц */
+.header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(12px);
+  z-index: 1000;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+}
+
+.header__inner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem 0;
+}
+
+.logo {
+  font-size: 28px;
+  font-weight: 700;
+  color: #2e7d32;
+  text-decoration: none;
+}
+
+.nav a {
+  margin-left: 2rem;
+  text-decoration: none;
+  color: #333;
+  font-weight: 500;
+  transition: color 0.3s;
+}
+
+.nav a:hover {
+  color: #2e7d32;
+}
+
+.btn-login, .btn-register, .btn-cta {
+  padding: 0.6rem 1.4rem;
+  font-weight: 500;
+  text-decoration: none;
+}
+
+
+/* footer для всех страниц */
+.footer {
+  background: #1e3a1e;
+  margin-top: 2rem;
+  color: #e0e0e0;
+  padding: 60px 0 30px;
+  margin-top: 100px;
+  font-size: 15px;
+}
+
+.footer__inner {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr;
+  gap: 3rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.logo-footer {
+  font-size: 28px;
+  font-weight: 700;
+  color: #4CAF50;
+  text-decoration: none;
+}
+
+.footer-description {
+  margin: 1rem 0;
+  line-height: 1.6;
+  color: #b0b0b0;
+}
+
+.footer-copyright {
+  margin-top: 2rem;
+  font-size: 14px;
+  color: #888;
+}
+
+.footer-links h4 {
+  color: white;
+  font-size: 18px;
+  margin-bottom: 1.5rem;
+}
+
+.footer-links ul {
+  list-style: none;
+}
+
+.footer-links li {
+  margin-bottom: 0.8rem;
+}
+
+.footer-links a {
+  color: #b0b0b0;
+  text-decoration: none;
+  transition: color 0.3s;
+}
+
+.footer-links a:hover {
+  color: #4CAF50;
+}
+
+.footer-contact h4 {
+  color: white;
+  font-size: 18px;
+  margin-bottom: 1.5rem;
+}
+
+.footer-contact p {
+  margin-bottom: 0.8rem;
+  color: #b0b0b0;
+}

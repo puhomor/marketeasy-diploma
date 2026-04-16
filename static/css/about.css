@@ -1,0 +1,177 @@
+/* about.css — стили только для страницы "О нас" */
+
+.about-page {
+  background: #f8fafc;
+  min-height: 100vh;
+}
+
+.about-hero {
+  padding: 160px 0 120px;
+  text-align: center;
+  background: linear-gradient(to bottom, #f8fafc, #ffffff);
+}
+
+.hero-content h1 {
+  font-size: 52px;
+  font-weight: 700;
+  color: #1e293b;
+  margin-bottom: 2rem;
+  line-height: 1.2;
+}
+
+.hero-subtitle {
+  font-size: 24px;
+  color: #475569;
+  max-width: 800px;
+  margin: 0 auto 3rem;
+  line-height: 1.6;
+}
+
+.btn-cta.large {
+  padding: 1.2rem 3.5rem;
+  font-size: 20px;
+  border-radius: 50px;
+}
+
+/* Проблема и решение */
+.problem-solution {
+  padding: 100px 0;
+}
+
+.ps-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4rem;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.ps-card {
+  background: white;
+  padding: 3rem;
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+}
+
+.ps-card.accent {
+  background: #f0fdf4;
+  border: 2px solid #86efac;
+}
+
+.ps-card h2 {
+  font-size: 32px;
+  color: #1e293b;
+  margin-bottom: 1.5rem;
+}
+
+.ps-card p {
+  font-size: 18px;
+  color: #475569;
+  line-height: 1.7;
+}
+
+/* Возможности */
+.features {
+  padding: 100px 0;
+  background: #f8fafc;
+  text-align: center;
+}
+
+.features h2 {
+  font-size: 40px;
+  color: #1e293b;
+  margin-bottom: 3rem;
+}
+
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 2rem;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.feature-card {
+  background: white;
+  padding: 3rem 2rem;
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+  transition: transform 0.3s;
+}
+
+.feature-card:hover {
+  transform: translateY(-10px);
+}
+
+.feature-card h3 {
+  font-size: 24px;
+  color: #1e293b;
+  margin-bottom: 1rem;
+}
+
+.feature-card p {
+  color: #64748b;
+  line-height: 1.6;
+}
+
+/* Создатель */
+.creator-section {
+  padding: 120px 0;
+}
+
+.creator-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 5rem;
+  align-items: center;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.creator-photo img {
+  width: 100%;
+  border-radius: 20px;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+}
+
+.creator-info h2 {
+  font-size: 36px;
+  color: #1e293b;
+  margin-bottom: 2rem;
+}
+
+.creator-info p {
+  font-size: 18px;
+  color: #475569;
+  line-height: 1.8;
+  margin-bottom: 1.5rem;
+}
+
+.creator-quote {
+  font-size: 20px;
+  font-style: italic;
+  color: #1e293b;
+  background: #f0fdf4;
+  padding: 1.5rem;
+  border-left: 5px solid #86efac;
+  border-radius: 8px;
+}
+
+/* Финальный призыв */
+.cta-final {
+  padding: 120px 0;
+  text-align: center;
+  background: #f8fafc;
+}
+
+.cta-final h2 {
+  font-size: 40px;
+  color: #1e293b;
+  margin-bottom: 1rem;
+}
+
+.cta-final p {
+  font-size: 20px;
+  color: #64748b;
+  margin-bottom: 3rem;
+}

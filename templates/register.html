@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Регистрация — MarketEasy</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/register.css') }}">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="register-page">
+
+  <header class="header">
+    <div class="container header__inner">
+      <a href="{{ url_for('index') }}" class="logo">MarketEasy</a>
+      <nav class="nav">
+        <a href="{{ url_for('pricing2') }}" {% if request.path == '/pricing2' %}class="active"{% endif %}>Тарифы</a>
+        <a href="{{ url_for('contacts') }}" {% if request.path == '/contacts' %}class="active"{% endif %}>Контакты</a>
+        <a href="{{ url_for('about') }}" {% if request.path == '/about' %}class="active"{% endif %}>О нас</a>
+  
+        {% if 'user_id' in session %}
+        <!-- Авторизованный пользователь -->
+        {% if session.get('has_subscription') %}
+          <a href="{% if session.get('marketplace') == 'wildberries' %}{{ url_for('analytics_wb') }}{% else %}{{ url_for('analytics_ozon') }}{% endif %}" class="btn-login">Личный кабинет</a>
+        {% else %}
+          <a href="{{ url_for('pricing') }}" class="btn-login">Личный кабинет</a>
+        {% endif %}
+          <a href="{{ url_for('logout') }}" class="btn-login">Выйти</a>
+        {% else %}
+          <!-- Неавторизованный -->
+          <a href="{{ url_for('login') }}" class="btn-login">Войти</a>
+          <a href="{{ url_for('register') }}" class="btn-cta">Регистрация</a>
+        {% endif %}
+      </nav>
+    </div>
+  </header>
+
+  <!-- Форма регистрации -->
+  <main class="register-form-container">
+    <div class="register-card">
+      <h1>Создать аккаунт</h1>
+      <p class="register-subtitle">Начните анализировать продажи уже сегодня</p>
+  
+      <!-- Сообщения flash -->
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          {% for category, message in messages %}
+            <div class="alert alert-{{ category }}">{{ message }}</div>
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
+  
+      <form method="POST">
+        <div class="form-group">
+          <label for="username">Имя пользователя</label>
+          <input type="text" id="username" name="username" required placeholder="Введите имя">
+        </div>
+  
+        <div class="form-group">
+          <label for="email">Email</label>
+          <input type="email" id="email" name="email" required placeholder="example@mail.com">
+        </div>
+  
+        <div class="form-group">
+          <label for="marketplace">Маркетплейс</label>
+          <select id="marketplace" name="marketplace_id" required class="form-select">
+            <option value="" disabled selected>Выберите маркетплейс</option>
+            {% for mp in marketplaces %}
+              <option value="{{ mp.id }}">{{ mp.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+  
+        <div class="form-group">
+          <label for="password">Пароль</label>
+          <input type="password" id="password" name="password" required placeholder="Минимум 6 символов">
+        </div>
+  
+        <button type="submit" class="btn-register-full">Зарегистрироваться</button>
+      </form>
+  
+      <p class="login-link">
+        Уже есть аккаунт? <a href="{{ url_for('login') }}">Войти</a>
+      </p>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="container footer__inner">
+      <div class="footer-left">
+        <a href="{{ url_for('index') }}" class="logo-footer">MarketEasy</a>
+        <p class="footer-description">
+          Простая аналитика для продавцов Wildberries и Ozon
+        </p>
+        <p class="footer-copyright">
+          © 2025 MarketEasy. Все права защищены.
+        </p>
+      </div>
+
+      <div class="footer-links">
+        <h4>Навигация</h4>
+        <ul>
+          <li><a href="{{ url_for('index') }}">Главная</a></li>
+          <li><a href="{{ url_for('pricing2') }}">Тарифы</a></li>
+          <li><a href="{{ url_for('contacts') }}">Контакты</a></li>
+          <li><a href="{{ url_for('about') }}">О нас</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-links">
+        <h4>Поддержка</h4>
+        <ul>
+          <li><a href="#">Помощь</a></li>
+          <li><a href="#">Условия использования</a></li>
+          <li><a href="#">Политика конфиденциальности</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-contact">
+        <h4>Связаться с нами</h4>
+        <p>support@marketeasy.ru</p>
+        <p>+7 (999) 123-45-67</p>
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>

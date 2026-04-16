@@ -1,0 +1,102 @@
+/* index.css — стили только для главной страницы (index.html) */
+
+/* Hero */
+.hero {
+  min-height: 100vh;
+  padding-top: 120px;
+  background: #fff;
+}
+
+.hero__inner {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4rem;
+  align-items: center;
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 0 2rem;
+}
+
+.hero__content h1 {
+  font-size: 52px;
+  font-weight: 700;
+  line-height: 1.2;
+  color: #1e3a1e;
+  margin-bottom: 1.5rem;
+}
+
+.hero__subtitle {
+  font-size: 20px;
+  color: #374151;
+  margin-bottom: 2.5rem;
+  max-width: 500px;
+}
+
+.hero__image img {
+  width: 100%;
+  border-radius: 20px;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+}
+
+/* Steps */
+.steps {
+  padding: 120px 0;
+  background: #f8fafc;
+  text-align: center;
+}
+
+.section-title {
+  font-size: 40px;
+  font-weight: 700;
+  color: #1e3a1e;
+  margin-bottom: 1rem;
+}
+
+.section-subtitle {
+  font-size: 20px;
+  color: #4b5563;
+  margin-bottom: 4rem;
+  max-width: 800px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.steps-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 3rem;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.step-card {
+  background: white;
+  padding: 2.5rem 2rem;
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+  transition: transform 0.3s;
+}
+
+.step-card:hover {
+  transform: translateY(-10px);
+}
+
+.step-number {
+  width: 60px;
+  height: 60px;
+  background: #2e7d32;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  font-weight: 700;
+  margin: 0 auto 1.5rem;
+}
+
+.step-card h3 {
+  font-size: 24px;
+  margin-bottom: 1rem;
+  color: #111;
+}

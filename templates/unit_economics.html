@@ -1,0 +1,819 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unit-экономика — MarketEasy</title>
+        
+    <!-- Общий стиль (структура, шапка, футер, дропдаун) -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+        
+    <!-- Брендовый стиль (цвета) -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/analytics_wb.css') }}">
+    
+    <!-- Стили для Unit-экономики -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/unit_economics.css') }}">
+</head>
+<body class="analytics-page analytics-wb">
+
+    <header class="header">
+        <div class="container header__inner">
+            <!-- Кнопка меню -->
+            <button class="menu-toggle" id="menuToggle">
+                <span class="hamburger-line"></span>
+                <span class="hamburger-line"></span>
+                <span class="hamburger-line"></span>
+                <span class="menu-label"></span>
+            </button>
+      
+            <!-- Логотип -->
+            <a href="{{ url_for('index') }}" class="logo">MarketEasy</a>
+      
+            <!-- Дропдаун профиля (справа) -->
+            <div class="user-dropdown">
+                <button class="user-button" id="userButton">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="12" cy="7" r="4"></circle>
+                    </svg>
+                </button>
+                
+                <div class="dropdown-menu" id="dropdownMenu">
+                    <div class="dropdown-item account-info">
+                        <strong>Аккаунт</strong><br>
+                        <span class="user-email">{{ user_email }}</span>
+                    </div>
+                    <hr class="dropdown-divider">
+                    <a href="{{ url_for('logout') }}" class="dropdown-item logout-btn">Выйти</a>
+                </div>
+            </div>
+        </div>
+    </header>
+      
+    <!-- Боковое меню (ниже хэдера) -->
+    <nav class="sidebar" id="sidebar">
+      <ul class="sidebar-menu">
+          <li><a href="{{ url_for('analytics_wb') }}">Аналитика недельных отчетов</a></li>
+          <li><a href="{{ url_for('unit_economics') }}">Unit-экономика</a></li>
+          <li><a href="{{ url_for('pl') }}">P&L отчеты</a></li>
+      </ul>
+    </nav>
+    
+    <main class="container analytics-main">
+        <h1>Unit-экономика</h1>
+        <p class="subtitle">Расчёт прибыльности отдельных товаров</p>
+      
+        <!-- Flash-сообщения -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="flash-messages">
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }}">{{ message }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+      
+        <div class="articles-table-container">
+            <div class="table-header-with-actions">
+                <h2>Ваши артикулы</h2>
+                <div class="table-actions">
+                    <button id="addArticleBtn" class="btn-add-article">+ Добавить товар</button>
+                    <button id="selectModeBtn" class="btn-select-mode">Выбрать товары для удаления</button>
+                    <button id="deleteSelectedBtn" class="btn-delete-selected" style="display: none;">Удалить выбранные</button>
+                    <button id="cancelSelectBtn" class="btn-cancel-select" style="display: none;">Отмена</button>
+                </div>
+            </div>
+            
+            {% if articles %}
+            <div class="table-wrapper">
+                <table class="unit-table" id="unitTable">
+                    <thead>
+                        <tr id="tableHeader">
+                            <th class="checkbox-col" rowspan="2" style="display: none; width: 40px; text-align: center;">
+                                <input type="checkbox" id="selectAllCheckbox" style="width: 18px; height: 18px; cursor: pointer; margin: 0;">
+                            </th>
+                            <th rowspan="2">Артикул</th>
+                            <th rowspan="2">Себестоимость</th>
+                            <th rowspan="2">Реклама</th>
+                            <th rowspan="2">Логистика</th>
+                            <th rowspan="2">Хранение</th>
+                            <th rowspan="2">Комиссия WB (%)</th>
+                            <th rowspan="2">% выкупа</th>
+                            <th colspan="2">Налоги</th>
+                            <th colspan="3">Цена</th>
+                            <th colspan="6">Результаты</th>
+                         </tr>
+                         <tr>
+                            <!-- Налоги (2 колонки) -->
+                            <th>Налог (%)</th>
+                            <th class="auto-calculated">Налог от цены после СПП</th>
+                            
+                            <!-- Цена (3 колонки) -->
+                            <th>Цена</th>
+                            <th>Скидка (%)</th>
+                            <th class="auto-calculated">Цена после скидки</th>
+                            
+                            <!-- Результаты (6 колонок) -->
+                            <th class="editable">СПП (%)</th>
+                            <th class="auto-calculated">Цена после СПП</th>
+                            <th class="auto-calculated">Прибыль за шт</th>
+                            <th class="auto-calculated">Затраты на возвраты</th>
+                            <th class="auto-calculated">Маржинальность (%)</th>
+                            <th class="auto-calculated">ROI (%)</th>
+                         </tr>
+                    </thead>
+                    <tbody>
+                        {% for article in articles %}
+                        <tr class="unit-row" data-article="{{ article.article }}">
+                            <td class="checkbox-cell" style="display: none; text-align: center;">
+                                <input type="checkbox" class="article-checkbox" data-article="{{ article.article }}">
+                            </td>
+                            <td class="article-cell">{{ article.article }}<br><small>{{ article.name }}</small>
+                            <td><input type="number" class="unit-input cost" value="{{ article.cost }}" step="0.01" placeholder="0">
+                            <td><input type="number" class="unit-input advertising" value="{{ article.advertising }}" step="0.01" placeholder="0">
+                            <td><input type="number" class="unit-input logistics" value="{{ article.logistics }}" step="0.01" placeholder="0">
+                            <td><input type="number" class="unit-input storage" value="{{ article.storage }}" step="0.01" placeholder="0">
+                            <td><input type="number" class="unit-input commission" value="{{ article.commission }}" step="0.5" placeholder="15">
+                            <td><input type="number" class="unit-input buyout_percent" value="{{ article.buyout_percent }}" step="1" placeholder="90">
+                            <td><input type="number" class="unit-input tax_percent" value="{{ article.tax_percent }}" step="0.5" placeholder="7">
+                            <td class="tax-after-spp auto-calculated-cell">
+                            <td><input type="number" class="unit-input price" value="{{ article.price }}" step="0.01" placeholder="0">
+                            <td><input type="number" class="unit-input discount" value="{{ article.discount }}" step="1" placeholder="0">
+                            <td class="price-after-discount auto-calculated-cell">
+                            <td><input type="number" class="unit-input spp-percent" value="{{ article.spp_percent }}" step="0.1" placeholder="0">
+                            <td class="price-after-spp auto-calculated-cell">
+                            <td class="profit-per-unit auto-calculated-cell">
+                            <td class="return-costs auto-calculated-cell">
+                            <td class="margin auto-calculated-cell">
+                            <td class="roi auto-calculated-cell">
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="no-articles">
+                <p>У вас пока нет сохранённых артикулов.</p>
+                <p>Загрузите отчёт Wildberries, чтобы артикулы появились здесь.</p>
+                <a href="{{ url_for('analytics_wb') }}" class="btn">Перейти к загрузке отчёта</a>
+            </div>
+            {% endif %}
+        </div>
+    </main>
+
+    <div id="addArticleModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Добавить товар</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="newArticle">Артикул *</label>
+                    <input type="text" id="newArticle" placeholder="Например: ART001" required>
+                </div>
+                <div class="form-group">
+                    <label for="newName">Название товара</label>
+                    <input type="text" id="newName" placeholder="Например: Футболка хлопковая">
+                </div>
+                <div class="form-group">
+                    <label for="newCost">Себестоимость (₽)</label>
+                    <input type="number" id="newCost" step="0.01" placeholder="0">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="saveArticleBtn" class="btn-save">Сохранить</button>
+                <button id="cancelArticleBtn" class="btn-cancel">Отмена</button>
+            </div>
+        </div>
+    </div>
+
+<!-- Скрипты -->
+
+<script>
+    // Сохранение всех unit-данных при изменении полей
+    let saveUnitTimeout;
+    
+    function saveAllUnitData() {
+        const unitData = [];
+        document.querySelectorAll('.unit-row').forEach(row => {
+            const article = row.dataset.article;
+            unitData.push({
+                article: article,
+                advertising: parseFloat(row.querySelector('.advertising').value) || 0,
+                logistics: parseFloat(row.querySelector('.logistics').value) || 0,
+                storage: parseFloat(row.querySelector('.storage').value) || 0,
+                commission: parseFloat(row.querySelector('.commission').value) || 0,
+                buyout_percent: parseFloat(row.querySelector('.buyout_percent').value) || 0,
+                tax_percent: parseFloat(row.querySelector('.tax_percent').value) || 0,
+                price: parseFloat(row.querySelector('.price').value) || 0,
+                discount: parseFloat(row.querySelector('.discount').value) || 0,
+                spp_percent: parseFloat(row.querySelector('.spp-percent').value) || 0
+            });
+        });
+        
+        if (unitData.length === 0) return;
+        
+        fetch('/save_unit_data', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ unit_data: unitData })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Показываем уведомление
+                showUnitSaveNotification();
+            }
+        })
+        .catch(error => console.error('Ошибка сохранения:', error));
+    }
+    
+    function showUnitSaveNotification() {
+        let notification = document.getElementById('unitSaveNotification');
+        if (!notification) {
+            notification = document.createElement('div');
+            notification.id = 'unitSaveNotification';
+            notification.style.position = 'fixed';
+            notification.style.bottom = '20px';
+            notification.style.right = '20px';
+            notification.style.backgroundColor = '#4CAF50';
+            notification.style.color = 'white';
+            notification.style.padding = '10px 20px';
+            notification.style.borderRadius = '5px';
+            notification.style.zIndex = '1000';
+            notification.style.animation = 'fadeInOut 2s';
+            document.body.appendChild(notification);
+        }
+        notification.textContent = '✓ Данные сохранены';
+        notification.style.display = 'block';
+        setTimeout(() => {
+            notification.style.display = 'none';
+        }, 2000);
+    }
+    
+    // Добавляем автосохранение при изменении полей
+    document.addEventListener('DOMContentLoaded', function() {
+        const allInputs = document.querySelectorAll('.unit-input');
+        allInputs.forEach(input => {
+            input.addEventListener('input', function() {
+                clearTimeout(saveUnitTimeout);
+                saveUnitTimeout = setTimeout(saveAllUnitData, 1500);
+            });
+        });
+    });
+</script>
+
+<script>
+        // Открытие/закрытие дропдауна
+        const userButton = document.getElementById('userButton');
+        const dropdownMenu = document.getElementById('dropdownMenu');
+
+        userButton.addEventListener('click', (e) => {
+            e.stopPropagation();
+            dropdownMenu.classList.toggle('show');
+        });
+
+        document.addEventListener('click', () => {
+            dropdownMenu.classList.remove('show');
+        });
+
+        dropdownMenu.addEventListener('click', (e) => {
+            e.stopPropagation();
+        });
+</script>
+
+<script>
+        const menuToggle = document.getElementById('menuToggle');
+        const sidebar = document.getElementById('sidebar');
+      
+        menuToggle.addEventListener('click', (e) => {
+            e.stopPropagation();
+            sidebar.classList.toggle('open');
+        });
+      
+        document.addEventListener('click', (e) => {
+            if (!sidebar.contains(e.target) && !menuToggle.contains(e.target)) {
+                sidebar.classList.remove('open');
+            }
+        });
+</script>
+    
+<script>
+      // Функция для форматирования чисел (без валюты)
+      function formatNumber(amount) {
+          return amount.toLocaleString('ru-RU', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      }
+      
+      // Функция для форматирования процентов
+      function formatPercent(amount) {
+          return amount.toFixed(2) + '%';
+      }
+      
+      function calculateRow(row) {
+          // Получаем значения из полей
+          const cost = parseFloat(row.querySelector('.cost').value) || 0;
+          const advertising = parseFloat(row.querySelector('.advertising').value) || 0;
+          const logistics = parseFloat(row.querySelector('.logistics').value) || 0;
+          const storage = parseFloat(row.querySelector('.storage').value) || 0;
+          const commission = parseFloat(row.querySelector('.commission').value) || 0;
+          const buyoutPercent = parseFloat(row.querySelector('.buyout_percent').value) || 0;
+          const taxPercent = parseFloat(row.querySelector('.tax_percent').value) || 0;
+          const price = parseFloat(row.querySelector('.price').value) || 0;
+          const discount = parseFloat(row.querySelector('.discount').value) || 0;
+          const sppPercent = parseFloat(row.querySelector('.spp-percent').value) || 0;
+          
+          // Коэффициенты
+          const buyoutCoeff = buyoutPercent / 100;
+          const returnCoeff = 1 - buyoutCoeff;
+          
+          // 1. Цена после скидки = Цена * (1 - скидка/100)
+          const priceAfterDiscount = price * (1 - discount / 100);
+          row.querySelector('.price-after-discount').textContent = formatNumber(priceAfterDiscount);
+          
+          // 2. Комиссия WB в рублях
+          const commissionAmount = priceAfterDiscount * (commission / 100);
+          
+          // 3. Цена после СПП = цена после скидки - (цена после скидки * СПП/100)
+          const priceAfterSPP = priceAfterDiscount - (priceAfterDiscount * (sppPercent / 100));
+          row.querySelector('.price-after-spp').textContent = formatNumber(priceAfterSPP);
+          
+          // 4. Налог от цены после СПП = Налог(%) * Цена после СПП / 100
+          const taxAfterSPP = priceAfterSPP * (taxPercent / 100);
+          row.querySelector('.tax-after-spp').textContent = formatNumber(taxAfterSPP);
+          
+          // 5. Затраты на возвраты = (Логистика до ПВЗ * (100% - % выкупа)) / % выкупа
+          // Если % выкупа = 0, чтобы избежать деления на ноль
+          let returnCosts = 0;
+          if (buyoutPercent > 0) {
+              returnCosts = (logistics * returnCoeff) / buyoutCoeff;
+          }
+          const returnElement = row.querySelector('.return-costs');
+          returnElement.textContent = formatNumber(returnCosts);
+          returnElement.style.color = '#b91c1c';
+          
+          // 6. Прибыль за шт = Цена после скидки - Комиссия - Логистика - Себестоимость - Налог от цены после СПП - Затраты на возвраты - Хранение - Реклама
+          const profitPerUnit = priceAfterDiscount - commissionAmount - logistics - cost - taxAfterSPP - returnCosts - storage - advertising;
+          const profitElement = row.querySelector('.profit-per-unit');
+          profitElement.textContent = formatNumber(profitPerUnit);
+          profitElement.style.color = profitPerUnit >= 0 ? '#16a34a' : '#dc2626';
+          
+          // 7. Маржинальность (%) = Прибыль за шт / (Цена * (1 - Скидка/100)) * 100%
+          // Упрощенно: Маржинальность = Прибыль за шт / Цена после скидки * 100
+          const margin = priceAfterDiscount > 0 ? (profitPerUnit / priceAfterDiscount * 100) : 0;
+          const marginElement = row.querySelector('.margin');
+          marginElement.textContent = formatPercent(margin);
+          
+          // 8. Полная себестоимость (все расходы на единицу товара)
+          const totalCosts = cost + logistics + storage + advertising + returnCosts + taxAfterSPP;
+          
+          // 9. ROI (%) = (Полная себестоимость + Прибыль за шт) / Полная себестоимость
+          // Если полная себестоимость = 0, чтобы избежать деления на ноль
+          let roi = 0;
+          if (totalCosts > 0) {
+              roi = ((totalCosts + profitPerUnit) / totalCosts) * 100;
+          } else if (profitPerUnit > 0) {
+              // Если себестоимость 0, а прибыль есть - бесконечность, покажем 999%
+              roi = 999;
+          }
+          
+          const roiElement = row.querySelector('.roi');
+          roiElement.textContent = formatPercent(roi);
+          
+          // Цвета для ROI
+          if (roi >= 200) roiElement.style.color = '#16a34a'; // Очень хорошо
+          else if (roi >= 150) roiElement.style.color = '#22c55e'; // Хорошо
+          else if (roi >= 120) roiElement.style.color = '#f59e0b'; // Средне
+          else if (roi >= 100) roiElement.style.color = '#f97316'; // Ниже среднего
+          else roiElement.style.color = '#dc2626'; // Плохо (меньше 100% - убыток)
+      }
+      
+      // Функция для обработки фокуса на полях ввода
+      function handleInputFocus(input) {
+          if (input.value === '0' || input.value === '0.00' || input.value === '0.0') {
+              input.value = '';
+          }
+      }
+      
+      // Функция для обработки потери фокуса
+      function handleInputBlur(input, row) {
+          if (input.value === '' || input.value === null) {
+              input.value = '0';
+          }
+          calculateRow(row);
+      }
+      
+      document.addEventListener('DOMContentLoaded', function() {
+          const rows = document.querySelectorAll('.unit-row');
+          rows.forEach(row => {
+              const inputs = row.querySelectorAll('.unit-input');
+              inputs.forEach(input => {
+                  // При фокусе убираем 0
+                  input.addEventListener('focus', function() {
+                      handleInputFocus(this);
+                  });
+                  
+                  // При вводе обновляем расчет
+                  input.addEventListener('input', () => calculateRow(row));
+                  
+                  // При потере фокуса проверяем и обновляем
+                  input.addEventListener('blur', function() {
+                      handleInputBlur(this, row);
+                  });
+              });
+              calculateRow(row);
+          });
+      });
+</script>
+
+<script>
+        // Функция для сохранения себестоимости при изменении поля
+        function saveCost(input) {
+            const article = input.closest('tr').dataset.article;
+            const cost = parseFloat(input.value) || 0;
+            
+            fetch('/save_costs', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    articles: [{
+                        article: article,
+                        cost: cost
+                    }]
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Визуальное подтверждение (зеленая рамка на 1 секунду)
+                    input.style.borderColor = '#16a34a';
+                    setTimeout(() => {
+                        input.style.borderColor = '';
+                    }, 1000);
+                } else {
+                    console.error('Ошибка сохранения:', data.error);
+                    input.style.borderColor = '#dc2626';
+                }
+            })
+            .catch(error => {
+                console.error('Ошибка:', error);
+                input.style.borderColor = '#dc2626';
+            });
+        }
+
+        // Модифицируем существующий код добавления обработчиков
+        document.addEventListener('DOMContentLoaded', function() {
+            const rows = document.querySelectorAll('.unit-row');
+            
+            rows.forEach(row => {
+                const inputs = row.querySelectorAll('.unit-input');
+                
+                // Находим поле себестоимости и добавляем обработчик потери фокуса
+                const costInput = row.querySelector('.cost');
+                if (costInput) {
+                    costInput.addEventListener('blur', function() {
+                        saveCost(this);
+                    });
+                }
+                
+                // Остальные поля только для расчета
+                inputs.forEach(input => {
+                    if (!input.classList.contains('cost')) {
+                        input.addEventListener('input', () => calculateRow(row));
+                        input.addEventListener('blur', () => calculateRow(row));
+                    } else {
+                        // Для себестоимости тоже обновляем расчет при вводе
+                        input.addEventListener('input', () => calculateRow(row));
+                    }
+                });
+                
+                // Первоначальный расчет
+                calculateRow(row);
+            });
+        });
+</script>
+
+<script>
+    // Функционал выбора и удаления товаров
+    document.addEventListener('DOMContentLoaded', function() {
+        const selectModeBtn = document.getElementById('selectModeBtn');
+        const deleteSelectedBtn = document.getElementById('deleteSelectedBtn');
+        const cancelSelectBtn = document.getElementById('cancelSelectBtn');
+        const checkboxCols = document.querySelectorAll('.checkbox-col');
+        const checkboxCells = document.querySelectorAll('.checkbox-cell');
+        const selectAllCheckbox = document.getElementById('selectAllCheckbox');
+        
+        let isSelectMode = false;
+        
+        // Обновление состояния чекбокса "Выделить все"
+        function updateSelectAllCheckbox() {
+            if (!selectAllCheckbox) return;
+            const allCheckboxes = document.querySelectorAll('.article-checkbox');
+            const checkedCheckboxes = document.querySelectorAll('.article-checkbox:checked');
+            
+            if (allCheckboxes.length === 0) {
+                selectAllCheckbox.checked = false;
+                selectAllCheckbox.indeterminate = false;
+            } else if (checkedCheckboxes.length === allCheckboxes.length) {
+                selectAllCheckbox.checked = true;
+                selectAllCheckbox.indeterminate = false;
+            } else if (checkedCheckboxes.length > 0) {
+                selectAllCheckbox.checked = false;
+                selectAllCheckbox.indeterminate = true;
+            } else {
+                selectAllCheckbox.checked = false;
+                selectAllCheckbox.indeterminate = false;
+            }
+        }
+        
+        // Выделить/снять все
+        function toggleSelectAll() {
+            const allCheckboxes = document.querySelectorAll('.article-checkbox');
+            const isChecked = selectAllCheckbox.checked;
+            
+            allCheckboxes.forEach(checkbox => {
+                checkbox.checked = isChecked;
+                const row = checkbox.closest('.unit-row');
+                if (isChecked) {
+                    row.classList.add('selected-for-delete');
+                } else {
+                    row.classList.remove('selected-for-delete');
+                }
+            });
+        }
+        
+        // Включение режима выбора
+        function enableSelectMode() {
+            isSelectMode = true;
+            
+            // Показываем колонку с чекбоксами
+            checkboxCols.forEach(col => col.style.display = 'table-cell');
+            checkboxCells.forEach(cell => cell.style.display = 'table-cell');
+            
+            // Меняем видимость кнопок
+            selectModeBtn.style.display = 'none';
+            deleteSelectedBtn.style.display = 'inline-block';
+            cancelSelectBtn.style.display = 'inline-block';
+            
+            // Сбрасываем чекбокс "Выделить все"
+            if (selectAllCheckbox) {
+                selectAllCheckbox.checked = false;
+                selectAllCheckbox.indeterminate = false;
+            }
+            
+            // Добавляем обработчики на чекбоксы для подсветки строк
+            document.querySelectorAll('.article-checkbox').forEach(checkbox => {
+                checkbox.addEventListener('change', function() {
+                    const row = this.closest('.unit-row');
+                    if (this.checked) {
+                        row.classList.add('selected-for-delete');
+                    } else {
+                        row.classList.remove('selected-for-delete');
+                    }
+                    updateSelectAllCheckbox();
+                });
+            });
+            
+            // Добавляем обработчик на чекбокс "Выделить все"
+            if (selectAllCheckbox) {
+                selectAllCheckbox.addEventListener('change', toggleSelectAll);
+            }
+        }
+        
+        // Отключение режима выбора
+        function disableSelectMode() {
+            isSelectMode = false;
+            
+            // Скрываем колонку с чекбоксами
+            checkboxCols.forEach(col => col.style.display = 'none');
+            checkboxCells.forEach(cell => cell.style.display = 'none');
+            
+            // Сбрасываем все чекбоксы
+            document.querySelectorAll('.article-checkbox').forEach(checkbox => {
+                checkbox.checked = false;
+                const row = checkbox.closest('.unit-row');
+                row.classList.remove('selected-for-delete');
+            });
+            
+            // Сбрасываем чекбокс "Выделить все"
+            if (selectAllCheckbox) {
+                selectAllCheckbox.checked = false;
+                selectAllCheckbox.indeterminate = false;
+            }
+            
+            // Меняем видимость кнопок
+            selectModeBtn.style.display = 'inline-block';
+            deleteSelectedBtn.style.display = 'none';
+            cancelSelectBtn.style.display = 'none';
+        }
+        
+        // Удаление выбранных товаров
+        function deleteSelected() {
+            const selectedArticles = [];
+            document.querySelectorAll('.article-checkbox:checked').forEach(checkbox => {
+                selectedArticles.push(checkbox.dataset.article);
+            });
+            
+            if (selectedArticles.length === 0) {
+                showNotification('Выберите товары для удаления', 'error');
+                return;
+            }
+            
+            if (confirm(`Удалить ${selectedArticles.length} товар(ов)? Это действие нельзя отменить.`)) {
+                fetch('/delete_articles', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        articles: selectedArticles
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showNotification(data.message, 'success');
+                        setTimeout(() => location.reload(), 1500);
+                    } else {
+                        showNotification('Ошибка: ' + data.error, 'error');
+                    }
+                })
+                .catch(error => {
+                    console.error('Ошибка:', error);
+                    showNotification('Ошибка при удалении', 'error');
+                });
+            }
+        }
+        
+        // Уведомление
+        function showNotification(message, type) {
+            const notification = document.createElement('div');
+            notification.textContent = message;
+            notification.style.position = 'fixed';
+            notification.style.bottom = '20px';
+            notification.style.right = '20px';
+            notification.style.backgroundColor = type === 'success' ? '#4CAF50' : '#f44336';
+            notification.style.color = 'white';
+            notification.style.padding = '10px 20px';
+            notification.style.borderRadius = '5px';
+            notification.style.zIndex = '1000';
+            notification.style.animation = 'fadeInOut 2s';
+            document.body.appendChild(notification);
+            setTimeout(() => notification.remove(), 2000);
+        }
+        
+        // Добавляем обработчики на кнопки
+        if (selectModeBtn) selectModeBtn.addEventListener('click', enableSelectMode);
+        if (cancelSelectBtn) cancelSelectBtn.addEventListener('click', disableSelectMode);
+        if (deleteSelectedBtn) deleteSelectedBtn.addEventListener('click', deleteSelected);
+    });
+</script>
+    
+<script>
+        // Функционал добавления товара
+        document.addEventListener('DOMContentLoaded', function() {
+            const addArticleBtn = document.getElementById('addArticleBtn');
+            const modal = document.getElementById('addArticleModal');
+            const modalClose = document.querySelector('.modal-close');
+            const cancelArticleBtn = document.getElementById('cancelArticleBtn');
+            const saveArticleBtn = document.getElementById('saveArticleBtn');
+            
+            // Открытие модального окна
+            if (addArticleBtn) {
+                addArticleBtn.addEventListener('click', function() {
+                    modal.style.display = 'flex';
+                    document.getElementById('newArticle').value = '';
+                    document.getElementById('newName').value = '';
+                    document.getElementById('newCost').value = '';
+                });
+            }
+            
+            // Закрытие модального окна
+            function closeModal() {
+                modal.style.display = 'none';
+            }
+            
+            if (modalClose) modalClose.addEventListener('click', closeModal);
+            if (cancelArticleBtn) cancelArticleBtn.addEventListener('click', closeModal);
+            
+            // Закрытие при клике вне окна
+            window.addEventListener('click', function(event) {
+                if (event.target === modal) {
+                    closeModal();
+                }
+            });
+            
+            // Сохранение товара
+            if (saveArticleBtn) {
+                saveArticleBtn.addEventListener('click', function() {
+                    const article = document.getElementById('newArticle').value.trim();
+                    const name = document.getElementById('newName').value.trim();
+                    const cost = parseFloat(document.getElementById('newCost').value) || 0;
+                    
+                    if (!article) {
+                        showNotification('Введите артикул', 'error');
+                        return;
+                    }
+                    
+                    fetch('/add_article', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            article: article,
+                            name: name,
+                            cost: cost
+                        })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            showNotification('✓ Товар добавлен', 'success');
+                            closeModal();
+                            setTimeout(() => location.reload(), 1500);
+                        } else {
+                            showNotification('Ошибка: ' + data.error, 'error');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Ошибка:', error);
+                        showNotification('Ошибка при добавлении', 'error');
+                    });
+                });
+            }
+            
+            // Уведомление
+            function showNotification(message, type) {
+                const notification = document.createElement('div');
+                notification.textContent = message;
+                notification.style.position = 'fixed';
+                notification.style.bottom = '20px';
+                notification.style.right = '20px';
+                notification.style.backgroundColor = type === 'success' ? '#4CAF50' : '#f44336';
+                notification.style.color = 'white';
+                notification.style.padding = '10px 20px';
+                notification.style.borderRadius = '5px';
+                notification.style.zIndex = '1000';
+                notification.style.animation = 'fadeInOut 2s';
+                document.body.appendChild(notification);
+                setTimeout(() => notification.remove(), 2000);
+            }
+        });
+</script>
+
+<style>
+    @keyframes fadeInOut {
+        0% { opacity: 0; transform: translateY(20px); }
+        15% { opacity: 1; transform: translateY(0); }
+        85% { opacity: 1; transform: translateY(0); }
+        100% { opacity: 0; transform: translateY(20px); }
+    }
+</style>
+
+    <footer class="footer">
+        <div class="container footer__inner">
+            <div class="footer-left">
+                <a href="{{ url_for('index') }}" class="logo-footer">MarketEasy</a>
+                <p class="footer-description">
+                    Простая аналитика для продавцов Wildberries и Ozon
+                </p>
+                <p class="footer-copyright">
+                    © 2025 MarketEasy. Все права защищены.
+                </p>
+            </div>
+
+            <div class="footer-links">
+                <h4>Навигация</h4>
+                <ul>
+                    <li><a href="{{ url_for('index') }}">Главная</a></li>
+                    <li><a href="{{ url_for('pricing2') }}">Тарифы</a></li>
+                    <li><a href="{{ url_for('contacts') }}">Контакты</a></li>
+                    <li><a href="{{ url_for('about') }}">О нас</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-links">
+                <h4>Поддержка</h4>
+                <ul>
+                    <li><a href="#">Помощь</a></li>
+                    <li><a href="#">Условия использования</a></li>
+                    <li><a href="#">Политика конфиденциальности</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-contact">
+                <h4>Связаться с нами</h4>
+                <p>support@marketeasy.ru</p>
+                <p>+7 (999) 123-45-67</p>
+            </div>
+        </div>
+    </footer>
+
+</body>
+</html>

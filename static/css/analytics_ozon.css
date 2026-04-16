@@ -1,0 +1,222 @@
+/* Аналитика Ozon — синий дизайн (точная копия WB, только цвета) */
+body.analytics-ozon {
+  --primary: #0ea5e9;
+  --primary-light: #e0f2fe;
+}
+
+body.analytics-ozon .header {
+  background: white;
+  border-bottom: 1px solid var(--primary-light);
+}
+
+body.analytics-ozon .user-button svg {
+  stroke: var(--primary);
+}
+
+body.analytics-ozon h1 {
+  color: #075985;
+}
+
+body.analytics-ozon .subtitle {
+  color: #0c4a6e;
+}
+
+body.analytics-ozon .btn-analyze {
+  background: var(--primary);
+  color: white;
+  border: none;
+  padding: 1rem 3rem;
+  font-size: 20px;
+  border-radius: 50px;
+  cursor: pointer;
+}
+
+/* Боковое меню */
+body.analytics-ozon .sidebar {
+  position: fixed;
+  top: 80px;
+  left: -300px;
+  width: 300px;
+  height: calc(100vh - 80px);
+  background: #0ea5e9;
+  z-index: 999;
+  padding-top: 2rem;
+}
+
+body.analytics-ozon .sidebar.open {
+  left: 0;
+}
+
+body.analytics-ozon .sidebar-menu {
+  list-style: none;
+}
+
+body.analytics-ozon .sidebar-menu li {
+  margin: 1rem 0;
+}
+
+body.analytics-ozon .sidebar-menu a {
+  color: white;
+  text-decoration: none;
+  font-size: 18px;
+  padding: 1rem 2rem;
+  display: block;
+}
+
+/* Кнопка меню */
+body.analytics-ozon .menu-toggle {
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  margin-right: 2rem;
+}
+
+body.analytics-ozon .hamburger-line {
+  width: 28px;
+  height: 3px;
+  background: #333;
+  border-radius: 2px;
+}
+
+body.analytics-ozon .upload-section {
+  max-width: 800px;
+  margin: 3rem auto;
+  padding: 3rem;
+  background: var(--primary-light);
+  border-radius: 20px;
+  text-align: center;
+}
+
+body.analytics-ozon .upload-label {
+  display: block;
+  padding: 3rem;
+  border: 3px dashed var(--primary);
+  border-radius: 16px;
+  cursor: pointer;
+  background: white;
+}
+
+body.analytics-ozon .upload-icon {
+  font-size: 48px;
+  display: block;
+  margin-bottom: 1rem;
+}
+
+body.analytics-ozon .upload-text {
+  font-size: 18px;
+  color: #075985;
+}
+
+body.analytics-ozon input[type="file"] {
+  display: none;
+}
+
+/* Заглушка "в разработке" */
+body.analytics-ozon .development-message {
+  margin-top: 4rem;
+  padding: 4rem 2rem;
+  background: var(--primary-light);
+  border-radius: 20px;
+  text-align: center;
+  border: 2px dashed var(--primary);
+}
+
+body.analytics-ozon .development-message h2 {
+  color: #075985;
+  font-size: 28px;
+  margin-bottom: 1rem;
+}
+
+body.analytics-ozon .development-message p {
+  color: #0c4a6e;
+  font-size: 18px;
+  margin-bottom: 2rem;
+}
+
+body.analytics-ozon .btn-link {
+  display: inline-block;
+  background: var(--primary);
+  color: white;
+  padding: 1rem 2.5rem;
+  border-radius: 50px;
+  text-decoration: none;
+  font-size: 18px;
+  font-weight: 500;
+}
+
+body.analytics-ozon .btn-link:hover {
+  background: #0284c7;
+}
+
+/* Flash-сообщения */
+body.analytics-ozon .flash-messages {
+  max-width: 800px;
+  margin: 2rem auto;
+}
+
+/* Дропдаун пользователя */
+body.analytics-ozon .user-dropdown {
+  position: relative;
+}
+
+body.analytics-ozon .dropdown-menu {
+  display: none;
+  position: absolute;
+  top: 100%;
+  right: 0;
+  min-width: 200px;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 0;
+  margin-top: 5px;
+  z-index: 1000;
+}
+
+body.analytics-ozon .dropdown-menu.show {
+  display: block;
+}
+
+body.analytics-ozon .dropdown-item {
+  display: block;
+  padding: 8px 16px;
+  color: #333;
+  text-decoration: none;
+}
+
+body.analytics-ozon .account-info {
+  padding: 8px 16px;
+  border-bottom: 1px solid #eee;
+}
+
+body.analytics-ozon .account-info .user-email {
+  color: #666;
+  font-size: 14px;
+}
+
+body.analytics-ozon .logout-btn {
+  color: #d00;
+}
+
+body.analytics-ozon .dropdown-divider {
+  height: 1px;
+  background: #eee;
+  margin: 0;
+  border: none;
+}
+
+body.analytics-ozon .user-button {
+  background: none;
+  border: none;
+  padding: 8px;
+  cursor: pointer;
+}
+
+/* Футер */
+body.analytics-ozon .footer {
+  margin-top: 255px;
+}

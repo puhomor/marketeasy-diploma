@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>P&L отчеты — MarketEasy</title>
+    
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/analytics_wb.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/pl.css') }}">
+</head>
+<body class="analytics-page analytics-wb">
+
+    <header class="header">
+        <div class="container header__inner">
+            <button class="menu-toggle" id="menuToggle">
+                <span class="hamburger-line"></span>
+                <span class="hamburger-line"></span>
+                <span class="hamburger-line"></span>
+                <span class="menu-label"></span>
+            </button>
+      
+            <a href="{{ url_for('index') }}" class="logo">MarketEasy</a>
+      
+            <div class="user-dropdown">
+                <button class="user-button" id="userButton">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="12" cy="7" r="4"></circle>
+                    </svg>
+                </button>
+                
+                <div class="dropdown-menu" id="dropdownMenu">
+                    <div class="dropdown-item account-info">
+                        <strong>Аккаунт</strong><br>
+                        <span class="user-email">{{ user_email }}</span>
+                    </div>
+                    <hr class="dropdown-divider">
+                    <a href="{{ url_for('logout') }}" class="dropdown-item logout-btn">Выйти</a>
+                </div>
+            </div>
+        </div>
+    </header>
+      
+    <nav class="sidebar" id="sidebar">
+        <ul class="sidebar-menu">
+            <li><a href="{{ url_for('analytics_wb') }}">Аналитика недельных отчетов</a></li>
+            <li><a href="{{ url_for('unit_economics') }}">Unit-экономика</a></li>
+            <li><a href="{{ url_for('pl') }}">P&L отчеты</a></li>
+        </ul>
+    </nav>
+    
+    <main class="container analytics-main">
+        <h1>P&L отчеты</h1>
+        <p class="subtitle">Сводка прибылей и убытков по загруженным отчетам</p>
+        
+        <!-- Блок "Ваши артикулы" - если нет отчетов -->
+        {% if not reports %}
+        <div class="no-articles">
+            <p>У вас пока нет загруженных отчетов.</p>
+            <p>Загрузите отчёт Wildberries.</p>
+            <a href="{{ url_for('analytics_wb') }}" class="btn">Перейти к загрузке отчёта</a>
+        </div>
+        {% else %}
+        
+        <!-- Панель фильтрации (показывается только если есть отчеты) -->
+        <div class="pl-filters">
+            <div class="filter-buttons">
+                <button id="filterAllBtn" class="filter-btn active">Все время</button>
+                <button id="filterSelectBtn" class="filter-btn">Выбрать период</button>
+            </div>
+            
+            <!-- Краткая сводка по выбранным отчетам -->
+            <div class="pl-summary" id="plSummary">
+                <h3>Сводка за все время</h3>
+                <div class="summary-stats">
+                    <div class="summary-item">
+                        <span class="summary-label">Отчетов:</span>
+                        <span class="summary-value" id="summaryCount">0</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-label">Выручка:</span>
+                        <span class="summary-value" id="summaryRevenue">0 ₽</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-label">Логистика:</span>
+                        <span class="summary-value" id="summaryLogistics">0 ₽</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-label">Хранение:</span>
+                        <span class="summary-value" id="summaryStorage">0 ₽</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-label">Прочие удержания:</span>
+                        <span class="summary-value" id="summaryOtherDeductions">0 ₽</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-label">Налог:</span>
+                        <span class="summary-value" id="summaryTax">0 ₽</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-label">Итого к оплате:</span>
+                        <span class="summary-value" id="summaryItogo">0 ₽</span>
+                    </div>
+                    <div class="summary-item highlight">
+                        <span class="summary-label">Чистая прибыль:</span>
+                        <span class="summary-value" id="summaryNetProfit">0 ₽</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Модальное окно выбора периода -->
+        <div id="periodModal" class="modal" style="display: none;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Выберите отчеты</h3>
+                    <button class="modal-close">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="quick-select-buttons">
+                        <button id="quick2WeeksBtn" class="quick-btn">За две недели</button>
+                        <button id="quickMonthBtn" class="quick-btn">За этот месяц</button>
+                        <button id="quick3MonthsBtn" class="quick-btn">За 3 месяца</button>
+                        <button id="quickQuarterBtn" class="quick-btn">За квартал</button>
+                        <button id="quickYearBtn" class="quick-btn">За год</button>
+                    </div>
+                    <div class="reports-list" id="reportsList">
+                        <!-- Список отчетов с чекбоксами будет заполнен через JS -->
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button id="applyFilterBtn" class="btn-apply">Применить</button>
+                    <button id="cancelFilterBtn" class="btn-cancel">Отмена</button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="pl-container">
+            <div class="pl-grid" id="plGrid">
+                {% for report in reports %}
+                <div class="pl-card" data-report-id="{{ report.id }}">
+                    <div class="pl-card-header">
+                        <div class="pl-card-header-top">
+                            <h3>{{ report.report_period }}</h3>
+                            <button class="delete-report-btn" data-report-id="{{ report.id }}" title="Удалить отчет">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M3 6h18"></path>
+                                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path>
+                                    <path d="M8 4V3a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v1"></path>
+                                    <line x1="10" y1="11" x2="10" y2="17"></line>
+                                    <line x1="14" y1="11" x2="14" y2="17"></line>
+                                </svg>
+                            </button>
+                        </div>
+                        <span class="report-date">Загружен: {{ report.created_at.strftime('%d.%m.%Y %H:%M') }}</span>
+                    </div>
+                    
+                    <div class="pl-card-stats">
+                        <div class="stat-item">
+                            <span class="stat-label">Товаров:</span>
+                            <span class="stat-value">{{ report.article_count }}</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Выручка:</span>
+                            <span class="stat-value revenue">{{ "{:,.2f}".format(report.revenue).replace(',', ' ') }} ₽</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Логистика:</span>
+                            <span class="stat-value expense">{{ "{:,.2f}".format(report.logistics).replace(',', ' ') }} ₽</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Хранение:</span>
+                            <span class="stat-value expense">{{ "{:,.2f}".format(report.storage).replace(',', ' ') }} ₽</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Прочие удержания:</span>
+                            <span class="stat-value expense">{{ "{:,.2f}".format(report.other_deductions).replace(',', ' ') }} ₽</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Налог:</span>
+                            <span class="stat-value expense">{{ "{:,.2f}".format(report.tax_amount).replace(',', ' ') }} ₽</span>
+                        </div>
+                        <div class="stat-item divider">
+                            <span class="stat-label">Итого к оплате:</span>
+                            <span class="stat-value">{{ "{:,.2f}".format(report.itogo_k_oplate).replace(',', ' ') }} ₽</span>
+                        </div>
+                        <div class="stat-item profit-item">
+                            <span class="stat-label">Чистая прибыль:</span>
+                            <span class="stat-value {% if report.net_profit >= 0 %}profit-positive{% else %}profit-negative{% endif %}">
+                                {{ "{:,.2f}".format(report.net_profit).replace(',', ' ') }} ₽
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <div class="pl-card-footer">
+                        <a href="{{ url_for('analytics_wb', report_id=report.id) }}" class="btn-detail">Подробнее</a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+    </main>
+
+    <script>
+        // 1. Дропдаун пользователя
+        const userButton = document.getElementById('userButton');
+        const dropdownMenu = document.getElementById('dropdownMenu');
+        if (userButton) {
+            userButton.addEventListener('click', (e) => {
+                e.stopPropagation();
+                dropdownMenu.classList.toggle('show');
+            });
+        }
+        document.addEventListener('click', () => {
+            if (dropdownMenu) dropdownMenu.classList.remove('show');
+        });
+        if (dropdownMenu) {
+            dropdownMenu.addEventListener('click', (e) => {
+                e.stopPropagation();
+            });
+        }
+    </script>
+    
+    <script>
+        // 2. Боковое меню
+        const menuToggle = document.getElementById('menuToggle');
+        const sidebar = document.getElementById('sidebar');
+        if (menuToggle) {
+            menuToggle.addEventListener('click', (e) => {
+                e.stopPropagation();
+                sidebar.classList.toggle('open');
+            });
+        }
+        document.addEventListener('click', (e) => {
+            if (sidebar && !sidebar.contains(e.target) && !menuToggle.contains(e.target)) {
+                sidebar.classList.remove('open');
+            }
+        });
+    </script>
+    
+    <script>
+        // 3. Уведомление для удаления
+        function showDeleteNotification(message) {
+            const notification = document.createElement('div');
+            notification.textContent = message;
+            notification.style.position = 'fixed';
+            notification.style.bottom = '20px';
+            notification.style.right = '20px';
+            notification.style.backgroundColor = '#4CAF50';
+            notification.style.color = 'white';
+            notification.style.padding = '10px 20px';
+            notification.style.borderRadius = '5px';
+            notification.style.zIndex = '1000';
+            notification.style.animation = 'fadeInOut 2s';
+            document.body.appendChild(notification);
+            setTimeout(() => notification.remove(), 2000);
+        }
+    
+        // Стиль для анимации
+        if (!document.querySelector('#delete-notification-style')) {
+            const style = document.createElement('style');
+            style.id = 'delete-notification-style';
+            style.textContent = `
+                @keyframes fadeInOut {
+                    0% { opacity: 0; transform: translateY(20px); }
+                    15% { opacity: 1; transform: translateY(0); }
+                    85% { opacity: 1; transform: translateY(0); }
+                    100% { opacity: 0; transform: translateY(20px); }
+                }
+            `;
+            document.head.appendChild(style);
+        }
+    
+        // 4. Обработчик удаления отчета
+        async function handleDeleteClick(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            const btn = e.currentTarget;
+            const reportId = btn.dataset.reportId;
+            
+            if (confirm('Вы уверены, что хотите удалить этот отчет? Это действие нельзя отменить.')) {
+                try {
+                    const response = await fetch(`/delete_report/${reportId}`, {
+                        method: 'DELETE',
+                        headers: { 'Content-Type': 'application/json' }
+                    });
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        const card = btn.closest('.pl-card');
+                        card.remove();
+                        showDeleteNotification('Отчет удален');
+                        
+                        const remainingCards = document.querySelectorAll('.pl-card');
+                        if (remainingCards.length === 0) {
+                            location.reload();
+                        }
+                    } else {
+                        alert('Ошибка при удалении: ' + data.error);
+                    }
+                } catch (error) {
+                    console.error('Ошибка:', error);
+                    alert('Ошибка при удалении отчета');
+                }
+            }
+        }
+    
+        // 5. Привязка обработчиков к кнопкам удаления
+        function attachDeleteEventListeners() {
+            document.querySelectorAll('.delete-report-btn').forEach(btn => {
+                btn.removeEventListener('click', handleDeleteClick);
+                btn.addEventListener('click', handleDeleteClick);
+            });
+        }
+    </script>
+    
+    {% if reports %}
+    <script>
+        // 6. Функционал фильтрации отчетов
+        let allReports = [];
+        let currentFilter = 'all';
+        let selectedReportIds = [];
+        
+        function formatMoney(amount) {
+            return amount.toLocaleString('ru-RU', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' ₽';
+        }
+        
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+        
+        function updateGrid(reports) {
+            const grid = document.getElementById('plGrid');
+            if (!grid) return;
+            
+            if (reports.length === 0) {
+                grid.innerHTML = '<div class="no-reports"><p>Нет отчетов за выбранный период</p></div>';
+                return;
+            }
+            
+            grid.innerHTML = '';
+            
+            reports.forEach(report => {
+                const card = document.createElement('div');
+                card.className = 'pl-card';
+                card.setAttribute('data-report-id', report.id);
+                const createdDate = new Date(report.created_at);
+                const formattedDate = createdDate.toLocaleDateString('ru-RU');
+                const formattedTime = createdDate.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+                card.innerHTML = `
+                    <div class="pl-card-header">
+                        <div class="pl-card-header-top">
+                            <h3>${escapeHtml(report.report_period)}</h3>
+                            <button class="delete-report-btn" data-report-id="${report.id}" title="Удалить отчет">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M3 6h18"></path>
+                                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path>
+                                    <path d="M8 4V3a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v1"></path>
+                                    <line x1="10" y1="11" x2="10" y2="17"></line>
+                                    <line x1="14" y1="11" x2="14" y2="17"></line>
+                                </svg>
+                            </button>
+                        </div>
+                        <span class="report-date">Загружен: ${formattedDate} ${formattedTime}</span>
+                    </div>
+                    <div class="pl-card-stats">
+                        <div class="stat-item">
+                            <span class="stat-label">Товаров:</span>
+                            <span class="stat-value">${report.article_count}</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Выручка:</span>
+                            <span class="stat-value revenue">${formatMoney(report.revenue)}</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Логистика:</span>
+                            <span class="stat-value expense">${formatMoney(report.logistics)}</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Хранение:</span>
+                            <span class="stat-value expense">${formatMoney(report.storage)}</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Прочие удержания:</span>
+                            <span class="stat-value expense">${formatMoney(report.other_deductions)}</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Налог:</span>
+                            <span class="stat-value expense">${formatMoney(report.tax_amount)}</span>
+                        </div>
+                        <div class="stat-item divider">
+                            <span class="stat-label">Итого к оплате:</span>
+                            <span class="stat-value">${formatMoney(report.itogo_k_oplate)}</span>
+                        </div>
+                        <div class="stat-item profit-item">
+                            <span class="stat-label">Чистая прибыль:</span>
+                            <span class="stat-value ${report.net_profit >= 0 ? 'profit-positive' : 'profit-negative'}">
+                                ${formatMoney(report.net_profit)}
+                            </span>
+                        </div>
+                    </div>
+                    <div class="pl-card-footer">
+                        <a href="/analytics/wb/${report.id}" class="btn-detail">Подробнее</a>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+            
+            // Привязываем обработчики к новым кнопкам удаления
+            attachDeleteEventListeners();
+        }
+        
+        function updateSummary(reports) {
+            const summary = {
+                count: reports.length,
+                revenue: 0,
+                logistics: 0,
+                storage: 0,
+                other_deductions: 0,
+                tax_amount: 0,
+                itogo_k_oplate: 0,
+                net_profit: 0
+            };
+            
+            reports.forEach(report => {
+                summary.revenue += report.revenue;
+                summary.logistics += report.logistics;
+                summary.storage += report.storage;
+                summary.other_deductions += report.other_deductions;
+                summary.tax_amount += report.tax_amount;
+                summary.itogo_k_oplate += report.itogo_k_oplate;
+                summary.net_profit += report.net_profit;
+            });
+            
+            const summaryDiv = document.getElementById('plSummary');
+            const summaryTitle = summaryDiv.querySelector('h3');
+            
+            if (reports.length > 0) {
+                summaryDiv.style.display = 'block';
+                summaryTitle.textContent = currentFilter === 'all' ? 'Сводка за все время' : 'Сводка за выбранный период';
+                
+                document.getElementById('summaryCount').textContent = summary.count;
+                document.getElementById('summaryRevenue').textContent = formatMoney(summary.revenue);
+                document.getElementById('summaryLogistics').textContent = formatMoney(summary.logistics);
+                document.getElementById('summaryStorage').textContent = formatMoney(summary.storage);
+                document.getElementById('summaryOtherDeductions').textContent = formatMoney(summary.other_deductions);
+                document.getElementById('summaryTax').textContent = formatMoney(summary.tax_amount);
+                document.getElementById('summaryItogo').textContent = formatMoney(summary.itogo_k_oplate);
+                const netProfitElement = document.getElementById('summaryNetProfit');
+                netProfitElement.textContent = formatMoney(summary.net_profit);
+                netProfitElement.style.color = summary.net_profit >= 0 ? '#16a34a' : '#dc2626';
+            } else {
+                summaryDiv.style.display = 'none';
+            }
+            
+            updateGrid(reports);
+        }
+        
+        function loadAllReports() {
+            fetch('/pl/filter', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ report_ids: [] })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    allReports = data.reports;
+                    updateSummary(allReports);
+                }
+            })
+            .catch(error => console.error('Ошибка загрузки отчетов:', error));
+        }
+        
+        function setupFilters() {
+            const filterAllBtn = document.getElementById('filterAllBtn');
+            const filterSelectBtn = document.getElementById('filterSelectBtn');
+            const periodModal = document.getElementById('periodModal');
+            const modalClose = document.querySelector('.modal-close');
+            const applyFilterBtn = document.getElementById('applyFilterBtn');
+            const cancelFilterBtn = document.getElementById('cancelFilterBtn');
+            const quick2WeeksBtn = document.getElementById('quick2WeeksBtn');
+            const quickMonthBtn = document.getElementById('quickMonthBtn');
+            const quick3MonthsBtn = document.getElementById('quick3MonthsBtn');
+            const quickQuarterBtn = document.getElementById('quickQuarterBtn');
+            const quickYearBtn = document.getElementById('quickYearBtn');
+            
+            filterAllBtn.addEventListener('click', () => {
+                filterAllBtn.classList.add('active');
+                filterSelectBtn.classList.remove('active');
+                currentFilter = 'all';
+                updateSummary(allReports);
+            });
+            
+            filterSelectBtn.addEventListener('click', () => {
+                filterSelectBtn.classList.add('active');
+                filterAllBtn.classList.remove('active');
+                openPeriodModal();
+            });
+            
+            function openPeriodModal() {
+                renderReportsList();
+                periodModal.style.display = 'flex';
+            }
+            
+            function closeModal() {
+                periodModal.style.display = 'none';
+            }
+            
+            function renderReportsList() {
+                const reportsList = document.getElementById('reportsList');
+                if (!reportsList) return;
+                
+                const monthNames = ['январь', 'февраль', 'март', 'апрель', 'май', 'июнь', 'июль', 'август', 'сентябрь', 'октябрь', 'ноябрь', 'декабрь'];
+                
+                const grouped = {};
+                allReports.forEach(report => {
+                    const date = new Date(report.created_at);
+                    const monthYear = `${monthNames[date.getMonth()]} ${date.getFullYear()}`;
+                    if (!grouped[monthYear]) grouped[monthYear] = [];
+                    grouped[monthYear].push(report);
+                });
+                
+                let html = '';
+                for (const [month, reports] of Object.entries(grouped)) {
+                    html += `<div class="report-group"><div class="group-header">${escapeHtml(month)}</div>`;
+                    reports.forEach(report => {
+                        const isChecked = selectedReportIds.includes(report.id);
+                        html += `
+                            <label class="report-checkbox-item">
+                                <input type="checkbox" class="report-checkbox" value="${report.id}" ${isChecked ? 'checked' : ''}>
+                                <span>${escapeHtml(report.report_period)}</span>
+                                <small>(${formatMoney(report.revenue)})</small>
+                            </label>
+                        `;
+                    });
+                    html += `</div>`;
+                }
+                reportsList.innerHTML = html;
+            }
+            
+            applyFilterBtn.addEventListener('click', () => {
+                const checkboxes = document.querySelectorAll('.report-checkbox:checked');
+                selectedReportIds = Array.from(checkboxes).map(cb => parseInt(cb.value));
+                currentFilter = 'selected';
+                const filteredReports = allReports.filter(r => selectedReportIds.includes(r.id));
+                updateSummary(filteredReports);
+                closeModal();
+            });
+            
+            cancelFilterBtn.addEventListener('click', closeModal);
+            if (modalClose) modalClose.addEventListener('click', closeModal);
+            
+            if (quick2WeeksBtn) quick2WeeksBtn.addEventListener('click', () => selectLast2Weeks());
+            if (quickMonthBtn) quickMonthBtn.addEventListener('click', () => selectCurrentMonth());
+            if (quick3MonthsBtn) quick3MonthsBtn.addEventListener('click', () => selectLast3Months());
+            if (quickQuarterBtn) quickQuarterBtn.addEventListener('click', () => selectCurrentQuarter());
+            if (quickYearBtn) quickYearBtn.addEventListener('click', () => selectLastYear());
+            
+            function selectLast2Weeks() {
+                const now = new Date();
+                const twoWeeksAgo = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 14);
+                selectedReportIds = allReports.filter(r => new Date(r.created_at) >= twoWeeksAgo).map(r => r.id);
+                updateCheckboxes();
+            }
+            
+            function selectCurrentMonth() {
+                const now = new Date();
+                selectedReportIds = allReports.filter(r => {
+                    const date = new Date(r.created_at);
+                    return date.getMonth() === now.getMonth() && date.getFullYear() === now.getFullYear();
+                }).map(r => r.id);
+                updateCheckboxes();
+            }
+            
+            function selectLast3Months() {
+                const now = new Date();
+                const threeMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 2, 1);
+                selectedReportIds = allReports.filter(r => new Date(r.created_at) >= threeMonthsAgo).map(r => r.id);
+                updateCheckboxes();
+            }
+            
+            function selectCurrentQuarter() {
+                const now = new Date();
+                const currentQuarter = Math.floor(now.getMonth() / 3);
+                const quarterStart = new Date(now.getFullYear(), currentQuarter * 3, 1);
+                selectedReportIds = allReports.filter(r => new Date(r.created_at) >= quarterStart).map(r => r.id);
+                updateCheckboxes();
+            }
+            
+            function selectLastYear() {
+                const now = new Date();
+                const oneYearAgo = new Date(now.getFullYear() - 1, now.getMonth(), now.getDate());
+                selectedReportIds = allReports.filter(r => new Date(r.created_at) >= oneYearAgo).map(r => r.id);
+                updateCheckboxes();
+            }
+            
+            function updateCheckboxes() {
+                document.querySelectorAll('.report-checkbox').forEach(cb => {
+                    cb.checked = selectedReportIds.includes(parseInt(cb.value));
+                });
+            }
+        }
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            loadAllReports();
+            setupFilters();
+            attachDeleteEventListeners(); // для статических карточек
+        });
+    </script>
+    {% endif %}
+
+<footer class="footer">
+    <div class="container footer__inner">
+        <div class="footer-left">
+            <a href="{{ url_for('index') }}" class="logo-footer">MarketEasy</a>
+            <p class="footer-description">Простая аналитика для продавцов Wildberries и Ozon</p>
+            <p class="footer-copyright">© 2026 MarketEasy. Все права защищены.</p>
+        </div>
+        <div class="footer-links">
+            <h4>Навигация</h4>
+            <ul>
+                <li><a href="{{ url_for('index') }}">Главная</a></li>
+                <li><a href="{{ url_for('pricing2') }}">Тарифы</a></li>
+                <li><a href="{{ url_for('contacts') }}">Контакты</a></li>
+                <li><a href="{{ url_for('about') }}">О нас</a></li>
+            </ul>
+        </div>
+        <div class="footer-links">
+            <h4>Поддержка</h4>
+            <ul>
+                <li><a href="#">Помощь</a></li>
+                <li><a href="#">Условия использования</a></li>
+                <li><a href="#">Политика конфиденциальности</a></li>
+            </ul>
+        </div>
+        <div class="footer-contact">
+            <h4>Связаться с нами</h4>
+            <p>support@marketeasy.ru</p>
+            <p>+7 (999) 123-45-67</p>
+        </div>
+    </div>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,221 @@
+.pricing-page {
+  padding: 140px 0 100px;
+  background: #f8fafc;
+}
+
+.page-title {
+  font-size: 48px;
+  font-weight: 700;
+  text-align: center;
+  color: #1e293b;
+  margin-bottom: 1rem;
+}
+
+.page-subtitle {
+  font-size: 20px;
+  text-align: center;
+  color: #475569;
+  max-width: 700px;
+  margin: 0 auto 4rem;
+}
+
+/* Сообщение для незарегистрированных */
+.auth-message {
+  text-align: center;
+  margin-bottom: 5rem;
+}
+
+.auth-card {
+  background: white;
+  padding: 3rem;
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.auth-card h2 {
+  font-size: 32px;
+  margin-bottom: 1.5rem;
+  color: #1e293b;
+}
+
+.auth-card p {
+  font-size: 18px;
+  color: #475569;
+  margin-bottom: 2rem;
+}
+
+.auth-buttons {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.btn-secondary {
+  background: transparent;
+  color: #2e7d32;
+  border: 2px solid #2e7d32;
+  padding: 0.8rem 2rem;
+  border-radius: 50px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.3s;
+}
+
+.btn-secondary:hover {
+  background: #f0fdf4;
+}
+
+/* Тарифы */
+.tariffs-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 2rem;
+  margin-bottom: 5rem;
+}
+
+.tariff-card {
+  background: white;
+  padding: 2.5rem;
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+  text-align: center;
+  position: relative;
+  transition: transform 0.3s;
+}
+
+.tariff-card:hover {
+  transform: translateY(-10px);
+}
+
+.recommended {
+  border: 3px solid #2e7d32;
+}
+
+.recommended-badge {
+  position: absolute;
+  top: -12px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #2e7d32;
+  color: white;
+  padding: 0.5rem 1.5rem;
+  border-radius: 50px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.tariff-card h3 {
+  font-size: 28px;
+  margin-bottom: 1.5rem;
+  color: #1e293b;
+}
+
+.price {
+  margin: 2rem 0;
+}
+
+.amount {
+  font-size: 48px;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.currency {
+  font-size: 20px;
+  color: #64748b;
+}
+
+.features {
+  list-style: none;
+  text-align: left;
+  margin: 2rem 0;
+}
+
+.features li {
+  padding: 0.8rem 0;
+  border-bottom: 1px solid #e5e7eb;
+  color: #475569;
+  font-size: 16px;
+}
+
+.features li:last-child {
+  border-bottom: none;
+}
+
+.tariff-note {
+  margin-top: 2rem;
+  font-size: 16px;
+  color: #64748b;
+  font-style: italic;
+}
+
+/* FAQ — аккордеон */
+.faq-section {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.faq-section h2 {
+  text-align: center;
+  font-size: 36px;
+  margin-bottom: 3rem;
+  color: #1e293b;
+}
+
+.faq-accordion {
+  margin: 0 auto;
+}
+
+.faq-item {
+  margin-bottom: 1rem;
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+.faq-question {
+  width: 100%;
+  padding: 1.2rem 1.5rem;
+  background: #f8fafc;
+  border: none;
+  text-align: left;
+  font-size: 18px;
+  font-weight: 600;
+  color: #1e293b;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: background 0.2s;
+}
+
+.faq-question:hover {
+  background: #f0f4f8;
+}
+
+.faq-toggle {
+  font-size: 24px;
+  font-weight: 400;
+  color: #64748b;
+  transition: transform 0.3s;
+}
+
+.faq-item.open .faq-toggle {
+  transform: rotate(45deg);
+}
+
+.faq-answer {
+  display: none;
+  padding: 0 1.5rem 1.5rem;
+  font-size: 16px;
+  color: #475569;
+  line-height: 1.7;
+}
+
+.faq-item.open .faq-answer {
+  display: block;
+}

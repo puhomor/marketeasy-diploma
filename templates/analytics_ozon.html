@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Аналитика Ozon — MarketEasy</title>
+        
+    <!-- Общий стиль (структура, шапка, футер, дропдаун) -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+        
+    <!-- Брендовый стиль (цвета) -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/analytics_ozon.css') }}">
+</head>
+<body class="analytics-page analytics-ozon">
+
+    <header class="header">
+        <div class="container header__inner">
+          <!-- Кнопка меню -->
+          <button class="menu-toggle" id="menuToggle">
+            <span class="hamburger-line"></span>
+            <span class="hamburger-line"></span>
+            <span class="hamburger-line"></span>
+            <span class="menu-label"></span>
+          </button>
+      
+          <!-- Логотип -->
+          <a href="{{ url_for('index') }}" class="logo">MarketEasy</a>
+      
+          <!-- Дропдаун профиля (справа) -->
+          <div class="user-dropdown">
+            <button class="user-button" id="userButton">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                <circle cx="12" cy="7" r="4"></circle>
+              </svg>
+            </button>
+            
+            <div class="dropdown-menu" id="dropdownMenu">
+              <div class="dropdown-item account-info">
+                <strong>Аккаунт</strong><br>
+                <span class="user-email">{{ user_email }}</span>
+              </div>
+              <hr class="dropdown-divider">
+              <a href="{{ url_for('logout') }}" class="dropdown-item logout-btn">Выйти</a>
+            </div>
+          </div>
+        </div>
+    </header>
+      
+    <!-- Боковое меню (ниже хэдера) -->
+    <nav class="sidebar" id="sidebar">
+      <ul class="sidebar-menu">
+          <li><a href="{{ url_for('analytics_ozon') }}">Аналитика недельных отчетов</a></li>
+      </ul>
+    </nav>
+    
+
+    <main class="container analytics-main">
+        <h1>Аналитика Ozon</h1>
+        <p class="subtitle">Загрузите отчёт Ozon для анализа</p>
+      
+        <!-- Flash-сообщения -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            <div class="flash-messages">
+              {% for category, message in messages %}
+                <div class="alert alert-{{ category }}">{{ message }}</div>
+              {% endfor %}
+            </div>
+          {% endif %}
+        {% endwith %}
+      
+        <!-- Простая форма загрузки -->
+        <div class="upload-section">
+          <form method="POST" enctype="multipart/form-data" action="#">
+            <div class="upload-item">
+              <label for="report_file" class="upload-label">
+                <input type="file" id="report_file" name="report_file" accept=".xlsx" required>
+                Выбрать файл .xlsx
+              </label>
+              <p class="file-name" id="file-name">Файл не выбран</p>
+            </div>
+        
+            <button type="submit" class="btn-analyze">Анализировать</button>
+          </form>
+        </div>
+      
+        <!-- Заглушка: функционал в разработке -->
+        <div class="development-message">
+          <h2>Функционал в разработке</h2>
+          <p>Аналитика для Ozon появится совсем скоро. Следите за обновлениями!</p>
+          <a href="{{ url_for('analytics_wb') }}" class="btn-link">Перейти к Wildberries</a>
+        </div>
+
+    </main>
+
+    <script src="{{ url_for('static', filename='js/analytics.js') }}"></script>
+
+<script>
+    // Открытие/закрытие дропдауна
+    const userButton = document.getElementById('userButton');
+    const dropdownMenu = document.getElementById('dropdownMenu');
+
+    userButton.addEventListener('click', (e) => {
+        e.stopPropagation();
+        dropdownMenu.classList.toggle('show');
+    });
+
+    document.addEventListener('click', () => {
+        dropdownMenu.classList.remove('show');
+    });
+
+    dropdownMenu.addEventListener('click', (e) => {
+        e.stopPropagation();
+    });
+</script>
+
+<script>
+    const menuToggle = document.getElementById('menuToggle');
+    const sidebar = document.getElementById('sidebar');
+  
+    menuToggle.addEventListener('click', (e) => {
+      e.stopPropagation();
+      sidebar.classList.toggle('open');
+    });
+  
+    document.addEventListener('click', (e) => {
+      if (!sidebar.contains(e.target) && !menuToggle.contains(e.target)) {
+        sidebar.classList.remove('open');
+      }
+    });
+</script>
+
+<script>
+  // Отображение имени файла
+  document.getElementById('report_file').addEventListener('change', function(e) {
+    const fileName = e.target.files[0] ? e.target.files[0].name : 'Файл не выбран';
+    document.getElementById('file-name').textContent = fileName;
+  });
+</script>
+
+<footer class="footer">
+  <div class="container footer__inner">
+    <div class="footer-left">
+      <a href="{{ url_for('index') }}" class="logo-footer">MarketEasy</a>
+      <p class="footer-description">
+        Простая аналитика для продавцов Wildberries и Ozon
+      </p>
+      <p class="footer-copyright">
+        © 2026 MarketEasy. Все права защищены.
+      </p>
+    </div>
+
+    <div class="footer-links">
+      <h4>Навигация</h4>
+      <ul>
+        <li><a href="{{ url_for('index') }}">Главная</a></li>
+        <li><a href="{{ url_for('pricing2') }}">Тарифы</a></li>
+        <li><a href="{{ url_for('contacts') }}">Контакты</a></li>
+        <li><a href="{{ url_for('about') }}">О нас</a></li>
+      </ul>
+    </div>
+
+    <div class="footer-links">
+      <h4>Поддержка</h4>
+      <ul>
+        <li><a href="#">Помощь</a></li>
+        <li><a href="#">Условия использования</a></li>
+        <li><a href="#">Политика конфиденциальности</a></li>
+      </ul>
+    </div>
+
+    <div class="footer-contact">
+      <h4>Связаться с нами</h4>
+      <p>support@marketeasy.ru</p>
+      <p>+7 (999) 123-45-67</p>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

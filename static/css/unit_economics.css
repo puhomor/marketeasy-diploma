@@ -1,0 +1,457 @@
+/* Стили для страницы Unit-экономики */
+.unit-economics-content {
+    margin-top: 2rem;
+}
+
+/* Стили для таблицы артикулов */
+.articles-table-container {
+    background: white;
+    margin-top: 2rem;
+    border-radius: 16px;
+    padding: 2rem;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+    margin-bottom: 3rem;
+}
+
+.articles-table-container h2 {
+    color: #4c1d95;
+    margin-bottom: 1.5rem;
+    font-size: 24px;
+}
+
+/* Заглушка если нет артикулов */
+.no-articles {
+    text-align: center;
+    padding: 3rem;
+    background: #f9f9f9;
+    border-radius: 12px;
+    color: #666;
+}
+
+.no-articles p {
+    margin-bottom: 1rem;
+}
+
+.no-articles .btn {
+    display: inline-block;
+    background: #9333ea;
+    color: white;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    text-decoration: none;
+    margin-top: 1rem;
+}
+
+.no-articles .btn:hover {
+    background: #7e22ce;
+}
+
+/* Таблица */
+.table-wrapper {
+    overflow-x: auto;
+    margin-top: 1rem;
+}
+
+.unit-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 1800px;
+    font-size: 13px;
+}
+
+.unit-table th {
+    background: #f3e8ff;
+    color: #4c1d95;
+    padding: 12px 8px;
+    text-align: center;
+    border: 1px solid #e9d5ff;
+    font-weight: 600;
+}
+
+.unit-table th[colspan] {
+    background: #e9d5ff;
+}
+
+.unit-table td {
+    padding: 8px;
+    border: 1px solid #e9d5ff;
+    vertical-align: middle;
+}
+
+.unit-table tbody tr:hover {
+    background: #faf5ff;
+}
+
+.article-cell {
+    font-weight: 500;
+    color: #4c1d95;
+    min-width: 150px;
+}
+
+.article-cell small {
+    font-weight: normal;
+    color: #666;
+    font-size: 11px;
+    display: block;
+}
+
+/* Поля ввода */
+.unit-input {
+    width: 100%;
+    padding: 6px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    text-align: right;
+    font-size: 13px;
+}
+
+.unit-input:focus {
+    outline: none;
+    border-color: #9333ea;
+    box-shadow: 0 0 0 2px #f3e8ff;
+}
+
+.unit-input[type="number"] {
+    -moz-appearance: textfield;
+}
+
+.unit-input[type="number"]::-webkit-outer-spin-button,
+.unit-input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+/* Автоматически рассчитываемые столбцы */
+.auto-calculated {
+    background-color: #f3e8ff;
+    color: #4c1d95;
+    font-weight: 600;
+}
+
+.auto-calculated-cell {
+    background-color: #faf5ff;
+    font-weight: 500;
+    text-align: right;
+    padding: 8px;
+}
+
+.unit-row:hover .auto-calculated-cell {
+    background-color: #f3e8ff;
+}
+
+/* Цвета для разных типов данных */
+.tax-amount { color: #7e22ce; }
+.price-after-discount { color: #2563eb; }
+.spp { color: #0891b2; }
+.price-after-spp { color: #0d9488; }
+.return-costs { color: #b91c1c; }
+.roi { font-weight: 700; }
+
+/* Стили для положительных/отрицательных значений */
+.profit-positive { color: #16a34a; }
+.profit-negative { color: #dc2626; }
+
+/* Добавить в unit_economics.css */
+
+/* Для редактируемого столбца СПП */
+.editable {
+    background-color: #fff3cd;
+    color: #856404;
+    font-weight: 600;
+}
+
+/* Для новых столбцов с налогами */
+.tax-rub, .tax-after-spp {
+    color: #7e22ce;
+}
+
+/* Убираем знаки валют из заголовков */
+.unit-table th.auto-calculated {
+    background-color: #f3e8ff;
+    color: #4c1d95;
+    font-weight: 600;
+}
+
+/* Для ячеек с числами (без валюты) */
+.auto-calculated-cell {
+    background-color: #faf5ff;
+    font-weight: 500;
+    text-align: right;
+    padding: 8px;
+}
+
+/* Добавить в unit_economics.css */
+
+/* Стили для поля при фокусе */
+.unit-input:focus {
+    outline: none;
+    border-color: #9333ea;
+    box-shadow: 0 0 0 2px #f3e8ff;
+    background-color: #fff;
+}
+
+/* Поле с нулем - чуть бледнее */
+.unit-input[value="0"] {
+    color: #999;
+}
+
+/* ROI теперь в результатах, стили уже есть */
+.roi {
+    font-weight: 700;
+}
+
+/* Стили для кнопок выбора и удаления */
+.table-header-with-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.table-header-with-actions h2 {
+    margin-bottom: 0;
+}
+
+.table-actions {
+    display: flex;
+    gap: 0.75rem;
+}
+
+.btn-select-mode {
+    background-color: #9333ea;
+    color: white;
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background 0.2s;
+}
+
+.btn-select-mode:hover {
+    background-color: #7e22ce;
+}
+
+.btn-delete-selected {
+    background-color: #dc2626;
+    color: white;
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background 0.2s;
+}
+
+.btn-delete-selected:hover {
+    background-color: #b91c1c;
+}
+
+.btn-cancel-select {
+    background-color: #6b7280;
+    color: white;
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background 0.2s;
+}
+
+.btn-cancel-select:hover {
+    background-color: #4b5563;
+}
+
+/* Стили для колонки с чекбоксами */
+.checkbox-col {
+    width: 40px;
+    text-align: center;
+}
+
+.checkbox-cell {
+    text-align: center;
+    vertical-align: middle;
+    width: 40px;
+}
+
+.article-checkbox {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+}
+
+/* Подсветка выбранных строк для удаления */
+.unit-row.selected-for-delete {
+    background-color: #fee2e2;
+}
+
+.unit-row.selected-for-delete:hover {
+    background-color: #fecaca;
+}
+
+/* Стили для колонки с чекбоксами */
+.checkbox-col {
+    width: 40px;
+    min-width: 40px;
+    text-align: center;
+    vertical-align: middle;
+    background-color: #f3e8ff;
+}
+
+.checkbox-cell {
+    text-align: center;
+    vertical-align: middle;
+    width: 40px;
+    min-width: 40px;
+    background-color: white;
+}
+
+.article-checkbox {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+    margin: 0;
+}
+
+/* Стили для кнопки добавления товара */
+.btn-add-article {
+    background-color: #10b981;
+    color: white;
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background 0.2s;
+}
+
+.btn-add-article:hover {
+    background-color: #059669;
+}
+
+/* Стили для модального окна */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    background: white;
+    border-radius: 16px;
+    width: 90%;
+    max-width: 450px;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.modal-header h3 {
+    margin: 0;
+    color: #4c1d95;
+    font-size: 1.25rem;
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: #6b7280;
+    transition: color 0.2s;
+}
+
+.modal-close:hover {
+    color: #dc2626;
+}
+
+.modal-body {
+    padding: 1.5rem;
+}
+
+.modal-body .form-group {
+    margin-bottom: 1rem;
+}
+
+.modal-body .form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: #374151;
+}
+
+.modal-body .form-group input {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 14px;
+}
+
+.modal-body .form-group input:focus {
+    outline: none;
+    border-color: #9333ea;
+    box-shadow: 0 0 0 2px #f3e8ff;
+}
+
+.modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    padding: 1rem 1.5rem;
+    border-top: 1px solid #e5e7eb;
+}
+
+.btn-save {
+    background-color: #9333ea;
+    color: white;
+    padding: 0.5rem 1.25rem;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.btn-save:hover {
+    background-color: #7e22ce;
+}
+
+.btn-cancel {
+    background-color: #6b7280;
+    color: white;
+    padding: 0.5rem 1.25rem;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.btn-cancel:hover {
+    background-color: #4b5563;
+}
+
+/* Стиль для чекбокса "Выделить все" в заголовке */
+.checkbox-col input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+    margin: 0;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}

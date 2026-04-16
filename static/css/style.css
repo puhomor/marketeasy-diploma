@@ -1,3 +1,4 @@
+/* style.css — общие стили для всех страниц (минимально) */
 * {
   margin: 0;
   padding: 0;
@@ -6,102 +7,125 @@
 
 body {
   font-family: 'Inter', sans-serif;
-  color: #333;
-  background: #fff;
-  line-height: 1.6;
+  color: #1f2937;
+  background: #ffffff;
+  line-height: 1.5;
 }
 
 .container {
-  width: min(90%, 1240px);
+  max-width: 1200px;
   margin: 0 auto;
+  padding: 0 20px;
 }
 
-/* Хедер для всех страниц */
+/* Header */
 .header {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(12px);
-  z-index: 1000;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+  background: rgba(255, 255, 255, 0.96);
+  backdrop-filter: blur(8px);
+  z-index: 100;
+  border-bottom: 1px solid #e5e7eb;
 }
 
 .header__inner {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1.5rem 0;
+  padding: 16px 0;
 }
 
 .logo {
-  font-size: 28px;
+  font-size: 26px;
   font-weight: 700;
-  color: #2e7d32;
+  color: #15803d;
   text-decoration: none;
+}
+
+.nav {
+  display: flex;
+  align-items: center;
+  gap: 24px;
 }
 
 .nav a {
-  margin-left: 2rem;
   text-decoration: none;
-  color: #333;
+  color: #374151;
   font-weight: 500;
-  transition: color 0.3s;
+  transition: color 0.2s;
 }
 
 .nav a:hover {
-  color: #2e7d32;
+  color: #15803d;
 }
 
 .btn-login, .btn-register, .btn-cta {
-  padding: 0.6rem 1.4rem;
+  padding: 8px 20px;
+  border-radius: 30px;
   font-weight: 500;
   text-decoration: none;
+  transition: all 0.2s;
 }
 
+.btn-login {
+  color: #15803d;
+  border: 1px solid #15803d;
+  background: transparent;
+}
 
-/* footer для всех страниц */
+.btn-login:hover {
+  background: #cfd1d0;
+  color: white;
+}
+
+.btn-register, .btn-cta {
+  background: #15803d;
+  color: white;
+  border: none;
+}
+
+.btn-register:hover, .btn-cta:hover {
+  background: #166534;
+}
+
+/* Footer */
 .footer {
-  background: #1e3a1e;
-  margin-top: 2rem;
-  color: #e0e0e0;
-  padding: 60px 0 30px;
-  margin-top: 100px;
-  font-size: 15px;
+  background: #0f2e1a;
+  color: #d1d5db;
+  padding: 48px 0 24px;
+  margin-top: 80px;
 }
 
 .footer__inner {
   display: grid;
   grid-template-columns: 2fr 1fr 1fr 1fr;
-  gap: 3rem;
-  max-width: 1200px;
-  margin: 0 auto;
+  gap: 40px;
 }
 
 .logo-footer {
-  font-size: 28px;
+  font-size: 24px;
   font-weight: 700;
-  color: #4CAF50;
+  color: #4ade80;
   text-decoration: none;
 }
 
 .footer-description {
-  margin: 1rem 0;
-  line-height: 1.6;
-  color: #b0b0b0;
+  margin: 16px 0;
+  font-size: 14px;
+  color: #9ca3af;
 }
 
 .footer-copyright {
-  margin-top: 2rem;
-  font-size: 14px;
-  color: #888;
+  font-size: 12px;
+  color: #6b7280;
 }
 
-.footer-links h4 {
+.footer-links h4, .footer-contact h4 {
   color: white;
-  font-size: 18px;
-  margin-bottom: 1.5rem;
+  font-size: 16px;
+  margin-bottom: 16px;
 }
 
 .footer-links ul {
@@ -109,26 +133,15 @@ body {
 }
 
 .footer-links li {
-  margin-bottom: 0.8rem;
+  margin-bottom: 8px;
 }
 
-.footer-links a {
-  color: #b0b0b0;
+.footer-links a, .footer-contact p {
+  color: #9ca3af;
   text-decoration: none;
-  transition: color 0.3s;
+  font-size: 14px;
 }
 
 .footer-links a:hover {
-  color: #4CAF50;
-}
-
-.footer-contact h4 {
-  color: white;
-  font-size: 18px;
-  margin-bottom: 1.5rem;
-}
-
-.footer-contact p {
-  margin-bottom: 0.8rem;
-  color: #b0b0b0;
+  color: #4ade80;
 }

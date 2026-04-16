@@ -516,7 +516,43 @@ def save_costs():
         cur.close()
         conn.close()
 
-
+@app.route("/get_saved_costs", methods=["POST"])
+def get_saved_costs():
+    if 'user_id' not in session:
+        return {"success": False, "error": "Not logged in"}, 401
+    
+    data = request.get_json()
+    articles = data.get('articles', [])
+    
+    if not articles:
+        return {"success": True, "costs": {}}
+    
+    conn = get_db_connection()
+    cur = conn.cursor()
+    
+    try:
+        result = {}
+        for article in articles:
+            cur.execute("""
+                SELECT cost FROM user_products 
+                WHERE article = %s 
+                AND report_id IN (SELECT id FROM user_reports WHERE user_id = %s)
+                AND cost > 0
+                ORDER BY created_at DESC LIMIT 1
+            """, (article, session['user_id']))
+            row = cur.fetchone()
+            if row and row['cost']:
+                result[article] = float(row['cost'])
+        
+        return {"success": True, "costs": result}
+        
+    except Exception as e:
+        print(f"Ошибка: {e}")
+        return {"success": False, "error": str(e)}, 500
+    finally:
+        cur.close()
+        conn.close()
+        
 @app.route("/analyze_wb", methods=["POST"])
 def analyze_wb():
     if 'user_id' not in session:

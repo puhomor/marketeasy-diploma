@@ -344,7 +344,7 @@ def analytics_wb(report_id=None):
 import pandas as pd
 from io import BytesIO
 
-def save_user_report(user_id, articles_data, period, analysis_result):
+def save_user_report(user_id, articles_data, period, analysis_result, report_type='main'):
     """
     Сохраняет отчет с базовыми P&L показателями
     """
@@ -367,18 +367,19 @@ def save_user_report(user_id, articles_data, period, analysis_result):
         cur.execute("""
             INSERT INTO user_reports (
                 user_id, report_period, start_date, end_date,
-                revenue, logistics, storage, other_deductions, itogo_k_oplate
-            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+                revenue, logistics, storage, other_deductions, itogo_k_oplate, report_type
+            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
             RETURNING id
         """, (user_id, period, start_date, end_date,
               analysis_result.get('revenue', 0),
               analysis_result.get('logistics', 0),
               analysis_result.get('storage', 0),
               analysis_result.get('other_deductions', 0),
-              analysis_result.get('itogo_k_oplate', 0)))
+              analysis_result.get('itogo_k_oplate', 0),
+              report_type))
         
         report_id = cur.fetchone()['id']
-        print(f"Создан новый отчет {period} с ID: {report_id}")
+        print(f"Создан новый отчет {period} с ID: {report_id}, тип: {report_type}")
         
         # Сохраняем артикулы
         for article in articles_data:
@@ -552,74 +553,65 @@ def get_saved_costs():
     finally:
         cur.close()
         conn.close()
-        
+
 @app.route("/analyze_wb", methods=["POST"])
 def analyze_wb():
     if 'user_id' not in session:
         return redirect(url_for("login"))
     
-    # Получаем все загруженные файлы
     report_files = request.files.getlist('report_files')
     
     if not report_files or len(report_files) == 0:
         flash("Пожалуйста, загрузите файл(ы) формата .xlsx", "error")
         return redirect(url_for("analytics_wb"))
     
-    # Проверяем расширения
     for file in report_files:
         if not file.filename.endswith('.xlsx'):
             flash(f"Файл {file.filename} не является .xlsx", "error")
             return redirect(url_for("analytics_wb"))
     
-    # Если загружен 1 файл — обрабатываем как обычно
+    # Если загружен 1 файл — возвращаем JSON
     if len(report_files) == 1:
-        return process_single_report(report_files[0])
+        result = process_single_report(report_files[0])
+        # Важно: возвращаем JSON, а не redirect
+        return result
     
     # Если загружено 2 файла — объединяем
     elif len(report_files) == 2:
-        return process_merged_reports(report_files[0], report_files[1])
+        result = process_merged_reports(report_files[0], report_files[1])
+        if result.get('redirect'):
+            return redirect(result['redirect'])
+        return result
     
     else:
         flash("Можно загрузить не более 2 файлов за раз", "error")
         return redirect(url_for("analytics_wb"))
 def process_single_report(file):
-    """Обработка одного файла (существующая логика)"""
+    """Обработка одного файла с выбором типа отчета"""
     try:
+        # Сначала парсим данные
         df = pd.read_excel(BytesIO(file.read()))
-        
-        # Определяем тип отчёта по первым строкам
-        report_type = detect_report_type(df)
-        
-        # Парсим данные
         result = parse_wb_report(df)
         
-        # Сохраняем отчёт
-        report_id = save_user_report(
-            session['user_id'], 
-            result['articles_data'], 
-            result['period'], 
-            result['analysis_result']
-        )
-        
-        session['current_report_id'] = report_id
-        
-        return render_template("analytics_wb.html", 
-                             user_email=session['email'], 
-                             analysis_result={
-                                 'period': result['period'],
-                                 'revenue': result['analysis_result']['revenue'],
-                                 'k_perenum': result['analysis_result']['k_perenum'],
-                                 'logistics': result['analysis_result']['logistics'],
-                                 'storage': result['analysis_result']['storage'],
-                                 'other_deductions': result['analysis_result']['other_deductions'],
-                                 'itogo_k_oplate': result['analysis_result']['itogo_k_oplate'],
-                                 'articles': result['articles_data'],
-                                 'report_id': report_id
-                             })
+        # Возвращаем JSON
+        return {
+            'need_type_selection': True,
+            'result': {
+                'period': result['period'],
+                'revenue': result['analysis_result']['revenue'],
+                'k_perenum': result['analysis_result']['k_perenum'],
+                'logistics': result['analysis_result']['logistics'],
+                'storage': result['analysis_result']['storage'],
+                'other_deductions': result['analysis_result']['other_deductions'],
+                'itogo_k_oplate': result['analysis_result']['itogo_k_oplate'],
+                'articles': result['articles_data']
+            }
+        }
         
     except Exception as e:
-        flash(f"Ошибка при анализе файла: {str(e)}", "error")
-        return redirect(url_for("analytics_wb"))
+        print(f"Ошибка при анализе файла: {e}")
+        return {"error": str(e)}
+    
 def process_merged_reports(file1, file2):
     """Объединение двух отчётов за одну неделю"""
     try:
@@ -652,33 +644,24 @@ def process_merged_reports(file1, file2):
         # Объединяем данные
         merged_result = merge_reports(main_result, buyout_result)
         
-        # Сохраняем объединённый отчёт
+        # Сохраняем объединённый отчёт (тип 'merged')
         report_id = save_user_report(
             session['user_id'], 
             merged_result['articles_data'], 
             merged_result['period'], 
-            merged_result['analysis_result']
+            merged_result['analysis_result'],
+            'merged'
         )
         
         session['current_report_id'] = report_id
         
-        return render_template("analytics_wb.html", 
-                             user_email=session['email'], 
-                             analysis_result={
-                                 'period': merged_result['period'],
-                                 'revenue': merged_result['analysis_result']['revenue'],
-                                 'k_perenum': merged_result['analysis_result']['k_perenum'],
-                                 'logistics': merged_result['analysis_result']['logistics'],
-                                 'storage': merged_result['analysis_result']['storage'],
-                                 'other_deductions': merged_result['analysis_result']['other_deductions'],
-                                 'itogo_k_oplate': merged_result['analysis_result']['itogo_k_oplate'],
-                                 'articles': merged_result['articles_data'],
-                                 'report_id': report_id
-                             })
+        # Возвращаем JSON с redirect
+        return {"redirect": url_for('analytics_wb', report_id=report_id)}
         
     except Exception as e:
-        flash(f"Ошибка при объединении отчётов: {str(e)}", "error")
-        return redirect(url_for("analytics_wb"))
+        print(f"Ошибка при объединении отчётов: {e}")
+        return {"error": str(e)}
+    
 def detect_report_type(df):
     """Определяет тип отчёта: 'main' (основной) или 'buyout' (по выкупам)"""
     # Проверяем первые строки датафрейма
@@ -882,6 +865,43 @@ def parse_wb_report(df):
         'analysis_result': analysis_result,
         'articles_data': articles_data
     }
+
+@app.route("/save_with_type", methods=["POST"])
+def save_with_type():
+    if 'user_id' not in session:
+        return redirect(url_for("login"))
+    
+    data = request.get_json()
+    report_type = data.get('report_type', 'main')
+    period = data.get('period')
+    revenue = data.get('revenue')
+    k_perenum = data.get('k_perenum')
+    logistics = data.get('logistics')
+    storage = data.get('storage')
+    other_deductions = data.get('other_deductions')
+    itogo_k_oplate = data.get('itogo_k_oplate')
+    articles = data.get('articles')
+    
+    analysis_result = {
+        'revenue': revenue,
+        'k_perenum': k_perenum,
+        'logistics': logistics,
+        'storage': storage,
+        'other_deductions': other_deductions,
+        'itogo_k_oplate': itogo_k_oplate
+    }
+    
+    report_id = save_user_report(
+        session['user_id'], 
+        articles, 
+        period, 
+        analysis_result,
+        report_type
+    )
+    
+    session['current_report_id'] = report_id
+    
+    return {"success": True, "report_id": report_id, "report_type": report_type}
 
 @app.route("/save_pl", methods=["POST"])
 def save_pl():
@@ -1089,11 +1109,11 @@ def pl():
     cur = conn.cursor()
     
     try:
-        # Получаем все отчеты пользователя, отсортированные по дате (новые сверху)
+        # Получаем все отчеты пользователя, включая report_type
         cur.execute("""
             SELECT id, report_period, start_date, end_date, 
                    revenue, logistics, storage, other_deductions, 
-                   itogo_k_oplate, tax_amount, net_profit, created_at
+                   itogo_k_oplate, tax_amount, net_profit, created_at, report_type
             FROM user_reports 
             WHERE user_id = %s 
             ORDER BY created_at DESC
@@ -1137,22 +1157,22 @@ def pl_filter():
     
     try:
         if report_ids:
-            # Получаем выбранные отчеты
+            # Получаем выбранные отчеты с report_type
             placeholders = ','.join(['%s'] * len(report_ids))
             cur.execute(f"""
                 SELECT id, report_period, start_date, end_date, 
                        revenue, logistics, storage, other_deductions, 
-                       itogo_k_oplate, tax_amount, net_profit, created_at
+                       itogo_k_oplate, tax_amount, net_profit, created_at, report_type
                 FROM user_reports 
                 WHERE user_id = %s AND id IN ({placeholders})
                 ORDER BY created_at DESC
             """, [session['user_id']] + report_ids)
         else:
-            # Все отчеты пользователя
+            # Все отчеты пользователя с report_type
             cur.execute("""
                 SELECT id, report_period, start_date, end_date, 
                        revenue, logistics, storage, other_deductions, 
-                       itogo_k_oplate, tax_amount, net_profit, created_at
+                       itogo_k_oplate, tax_amount, net_profit, created_at, report_type
                 FROM user_reports 
                 WHERE user_id = %s 
                 ORDER BY created_at DESC
@@ -1186,7 +1206,8 @@ def pl_filter():
                 'tax_amount': float(report['tax_amount']) if report['tax_amount'] else 0,
                 'net_profit': float(report['net_profit']) if report['net_profit'] else 0,
                 'article_count': report['article_count'],
-                'created_at': report['created_at'].isoformat() if report['created_at'] else None
+                'created_at': report['created_at'].isoformat() if report['created_at'] else None,
+                'report_type': report['report_type'] if report['report_type'] else 'main'  # ← ДОБАВИТЬ ЭТУ СТРОКУ
             })
         
         return {"success": True, "reports": reports_data}

@@ -142,9 +142,17 @@
                 <div class="pl-card" data-report-id="{{ report.id }}">
                     <div class="pl-card-header">
                         <div class="pl-card-header-top">
-                            <h3>{{ report.report_period }}</h3>
+                            <h3>
+                                {% if report.report_type == 'buyout' %}
+                                    По выкупам
+                                {% elif report.report_type == 'merged' %}
+                                    Основной + По выкупам
+                                {% else %}
+                                    Основной
+                                {% endif %}
+                            </h3>
                             <button class="delete-report-btn" data-report-id="{{ report.id }}" title="Удалить отчет">
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                     <path d="M3 6h18"></path>
                                     <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path>
                                     <path d="M8 4V3a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v1"></path>
@@ -153,6 +161,7 @@
                                 </svg>
                             </button>
                         </div>
+                        <div class="report-period-date">{{ report.report_period }}</div>
                         <span class="report-date">Загружен: {{ report.created_at.strftime('%d.%m.%Y %H:%M') }}</span>
                     </div>
                     
@@ -353,22 +362,34 @@
                 const createdDate = new Date(report.created_at);
                 const formattedDate = createdDate.toLocaleDateString('ru-RU');
                 const formattedTime = createdDate.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+                
+                // Определяем текст типа отчета
+                let reportTypeText = 'Основной';
+                if (report.report_type === 'buyout') {
+                    reportTypeText = 'По выкупам';
+                } else if (report.report_type === 'merged') {
+                    reportTypeText = 'Основной + По выкупам';
+                }
+                
                 card.innerHTML = `
-                    <div class="pl-card-header">
-                        <div class="pl-card-header-top">
-                            <h3>${escapeHtml(report.report_period)}</h3>
-                            <button class="delete-report-btn" data-report-id="${report.id}" title="Удалить отчет">
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M3 6h18"></path>
-                                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path>
-                                    <path d="M8 4V3a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v1"></path>
-                                    <line x1="10" y1="11" x2="10" y2="17"></line>
-                                    <line x1="14" y1="11" x2="14" y2="17"></line>
-                                </svg>
-                            </button>
-                        </div>
-                        <span class="report-date">Загружен: ${formattedDate} ${formattedTime}</span>
+                <div class="pl-card-header">
+                    <div class="pl-card-header-top">
+                        <h3>
+                            ${reportTypeText}
+                        </h3>
+                        <button class="delete-report-btn" data-report-id="${report.id}" title="Удалить отчет">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M3 6h18"></path>
+                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path>
+                                <path d="M8 4V3a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v1"></path>
+                                <line x1="10" y1="11" x2="10" y2="17"></line>
+                                <line x1="14" y1="11" x2="14" y2="17"></line>
+                            </svg>
+                        </button>
                     </div>
+                    <div class="report-period-date">${escapeHtml(report.report_period)}</div>
+                    <span class="report-date">Загружен: ${formattedDate} ${formattedTime}</span>
+                </div>
                     <div class="pl-card-stats">
                         <div class="stat-item">
                             <span class="stat-label">Товаров:</span>

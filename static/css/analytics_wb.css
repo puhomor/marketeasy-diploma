@@ -568,3 +568,119 @@ body.dragging {
 .footer {
   margin-top: 23rem;
 }
+
+/* Модальное окно выбора типа отчета */
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10000;
+}
+
+.modal-content {
+  background: white;
+  border-radius: 20px;
+  width: 90%;
+  max-width: 400px;
+  box-shadow: 0 20px 35px rgba(0, 0, 0, 0.2);
+  animation: modalFadeIn 0.3s ease-out;
+  overflow: hidden;
+}
+
+@keyframes modalFadeIn {
+  from {
+      opacity: 0;
+      transform: scale(0.95);
+  }
+  to {
+      opacity: 1;
+      transform: scale(1);
+  }
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.25rem;
+  background: #4c1d95;
+  color: white;
+}
+
+.modal-header h3 {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 1.5rem;
+  cursor: pointer;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-close:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.modal-body {
+  padding: 1.5rem;
+  text-align: center;
+}
+
+.modal-body p {
+  color: #4a5568;
+  margin-bottom: 1.5rem;
+}
+
+.modal-buttons {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+}
+
+.modal-btn {
+  padding: 0.6rem 1.25rem;
+  border: none;
+  border-radius: 50px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  flex: 1;
+}
+
+.modal-btn-main {
+  background: #2e7d32;
+  color: white;
+}
+
+.modal-btn-main:hover {
+  background: #1b5e20;
+  transform: translateY(-1px);
+}
+
+.modal-btn-buyout {
+  background: #ff9800;
+  color: white;
+}
+
+.modal-btn-buyout:hover {
+  background: #f57c00;
+  transform: translateY(-1px);
+}

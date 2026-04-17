@@ -477,3 +477,11 @@ main {
 .footer {
     margin-top: 6rem;
 }
+
+.report-period-date {
+    font-size: 0.7rem;
+    color: rgba(255, 255, 255, 0.9);
+    margin-top: 0.25rem;
+    margin-bottom: 0.15rem;
+    font-weight: normal;
+}

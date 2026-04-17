@@ -230,6 +230,23 @@
         {% endif %}
     </main>
 
+    <!-- Модальное окно выбора типа отчета -->
+    <div id="reportTypeModal" class="modal" style="display: none;">
+      <div class="modal-content">
+          <div class="modal-header">
+              <h3>Выберите тип отчета</h3>
+              <button class="modal-close" onclick="closeTypeModal()">&times;</button>
+          </div>
+          <div class="modal-body">
+              <p>Какой тип отчета вы загружаете?</p>
+              <div class="modal-buttons">
+                  <button id="selectMainBtn" class="modal-btn modal-btn-main">Основной</button>
+                  <button id="selectBuyoutBtn" class="modal-btn modal-btn-buyout">По выкупам</button>
+              </div>
+          </div>
+      </div>
+    </div>
+
     <script src="{{ url_for('static', filename='js/analytics.js') }}"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
@@ -270,7 +287,7 @@
     });
 </script>
   
-<!--3 имя файла (поддержка нескольких файлов)-->
+<!--3 имя файла и отправка с поддержкой выбора типа отчета -->
 <script>
   // Отображение имен выбранных файлов
   const fileInput = document.querySelector('input[name="report_files"]');
@@ -291,6 +308,128 @@
           }
       });
   }
+  
+  // Переменные для хранения данных отчета при выборе типа
+  let pendingReportData = null;
+  
+  function closeTypeModal() {
+      document.getElementById('reportTypeModal').style.display = 'none';
+      pendingReportData = null;
+      document.body.style.overflow = '';
+  }
+  
+  function saveWithType(reportType) {
+      if (!pendingReportData) return;
+      
+      fetch('/save_with_type', {
+          method: 'POST',
+          headers: {
+              'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+              report_type: reportType,
+              period: pendingReportData.period,
+              revenue: pendingReportData.revenue,
+              k_perenum: pendingReportData.k_perenum,
+              logistics: pendingReportData.logistics,
+              storage: pendingReportData.storage,
+              other_deductions: pendingReportData.other_deductions,
+              itogo_k_oplate: pendingReportData.itogo_k_oplate,
+              articles: pendingReportData.articles
+          })
+      })
+      .then(response => response.json())
+      .then(data => {
+          if (data.success) {
+              closeTypeModal();
+              window.location.href = `/analytics/wb/${data.report_id}`;
+          } else {
+              alert('Ошибка при сохранении отчета');
+          }
+      })
+      .catch(error => {
+          console.error('Ошибка:', error);
+          alert('Ошибка при сохранении отчета');
+      });
+  }
+  
+  // Отправка файлов на сервер
+  document.querySelector('.btn-analyze').addEventListener('click', function(e) {
+      e.preventDefault();
+      
+      const files = fileInput.files;
+      if (files.length === 0) {
+          alert('Выберите файлы');
+          return;
+      }
+      
+      const formData = new FormData();
+      for (let i = 0; i < files.length; i++) {
+          formData.append('report_files', files[i]);
+      }
+      
+      const analyzeBtn = document.querySelector('.btn-analyze');
+      const originalText = analyzeBtn.textContent;
+      analyzeBtn.textContent = 'Анализируем...';
+      analyzeBtn.disabled = true;
+      
+      fetch('/analyze_wb', {
+          method: 'POST',
+          body: formData,
+          headers: {
+              'Accept': 'application/json'
+          }
+      })
+      .then(response => {
+          // Проверяем тип ответа
+          const contentType = response.headers.get('content-type');
+          if (contentType && contentType.includes('application/json')) {
+              return response.json();
+          } else if (response.redirected) {
+              window.location.href = response.url;
+              return null;
+          } else {
+              return response.text().then(text => {
+                  if (text.includes('analysis-result')) {
+                      window.location.reload();
+                  } else {
+                      alert('Ошибка при анализе');
+                  }
+                  return null;
+              });
+          }
+      })
+      .then(data => {
+          if (data && data.need_type_selection) {
+              pendingReportData = data.result;
+              document.getElementById('reportTypeModal').style.display = 'flex';
+              document.body.style.overflow = 'hidden';
+              analyzeBtn.textContent = originalText;
+              analyzeBtn.disabled = false;
+          } else if (data && data.redirect) {
+              window.location.href = data.redirect;
+          }
+      })
+      .catch(error => {
+          console.error('Ошибка:', error);
+          alert('Ошибка при анализе');
+          analyzeBtn.textContent = originalText;
+          analyzeBtn.disabled = false;
+      });
+  });
+  
+  // Обработчики для кнопок выбора типа отчета
+  document.addEventListener('DOMContentLoaded', function() {
+      const selectMainBtn = document.getElementById('selectMainBtn');
+      const selectBuyoutBtn = document.getElementById('selectBuyoutBtn');
+      
+      if (selectMainBtn) {
+          selectMainBtn.addEventListener('click', () => saveWithType('main'));
+      }
+      if (selectBuyoutBtn) {
+          selectBuyoutBtn.addEventListener('click', () => saveWithType('buyout'));
+      }
+  });
 </script>
 
 <!--4 calculateTotals и графики-->

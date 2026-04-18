@@ -14,20 +14,17 @@
     <div class="container header__inner">
       <a href="{{ url_for('index') }}" class="logo">MarketEasy</a>
       <nav class="nav">
-        <a href="{{ url_for('pricing2') }}" {% if request.path == '/pricing2' %}class="active"{% endif %}>Тарифы</a>
-        <a href="{{ url_for('contacts') }}" {% if request.path == '/contacts' %}class="active"{% endif %}>Контакты</a>
-        <a href="{{ url_for('about') }}" {% if request.path == '/about' %}class="active"{% endif %}>О нас</a>
-  
+        <a href="{{ url_for('pricing2') }}">Тарифы</a>
+        <a href="{{ url_for('contacts') }}">Контакты</a>
+        <a href="{{ url_for('about') }}" class="active">О нас</a>
         {% if 'user_id' in session %}
-        <!-- Авторизованный пользователь -->
-        {% if session.get('has_subscription') %}
-          <a href="{% if session.get('marketplace') == 'wildberries' %}{{ url_for('analytics_wb') }}{% else %}{{ url_for('analytics_ozon') }}{% endif %}" class="btn-login">Личный кабинет</a>
-        {% else %}
-          <a href="{{ url_for('pricing') }}" class="btn-login">Личный кабинет</a>
-        {% endif %}
+          {% if session.get('has_subscription') %}
+            <a href="{% if session.get('marketplace') == 'wildberries' %}{{ url_for('analytics_wb') }}{% else %}{{ url_for('analytics_ozon') }}{% endif %}" class="btn-login">Личный кабинет</a>
+          {% else %}
+            <a href="{{ url_for('pricing') }}" class="btn-login">Личный кабинет</a>
+          {% endif %}
           <a href="{{ url_for('logout') }}" class="btn-login">Выйти</a>
         {% else %}
-          <!-- Неавторизованный -->
           <a href="{{ url_for('login') }}" class="btn-login">Войти</a>
           <a href="{{ url_for('register') }}" class="btn-cta">Регистрация</a>
         {% endif %}
@@ -35,54 +32,124 @@
     </div>
   </header>
 
-  <main class="about-main">
+  <main>
 
-    <!-- Герой — большой и чистый -->
+    <!-- Герой (оставляем) -->
     <section class="about-hero">
       <div class="container hero-content">
         <h1>Понятная аналитика<br>для продавцов маркетплейсов</h1>
-        <p class="hero-subtitle">
-          Мы помогаем разобраться, куда уходят ваши деньги на Wildberries и Ozon.<br>
-          Без сложных таблиц — только реальные цифры и выводы.
-        </p>
+        <p class="hero-subtitle">MarketEasy превращает хаос отчётов Wildberries и Ozon в понятные цифры.</p>
         <a href="{{ url_for('register') }}" class="btn-cta large">Попробовать бесплатно</a>
       </div>
     </section>
 
-    <!-- Проблема и решение -->
+    <!-- Проблема → Решение (две карточки, не сетка) -->
     <section class="problem-solution">
       <div class="container ps-grid">
         <div class="ps-card">
-          <h2>Проблема</h2>
-          <p>Отчёты маркетплейсов — это сотни строк. Трудно понять: сколько реально заработали, где убытки, сколько ушло на комиссии и логистику.</p>
+          <span class="ps-label">Проблема</span>
+          <p>Отчёты маркетплейсов — это сотни строк. Сложно понять реальную прибыль, увидеть скрытые комиссии и возвраты.</p>
         </div>
         <div class="ps-card accent">
-          <h2>Решение</h2>
-          <p>MarketEasy берёт ваш отчёт и показывает всё простыми цифрами: выручка, прибыль, возвраты, топ товаров. За секунды.</p>
+          <span class="ps-label">Решение</span>
+          <p>MarketEasy парсит отчёты, объединяет данные, считает налоги и показывает чистую прибыль по каждому товару.</p>
         </div>
       </div>
     </section>
 
-    <!-- Что вы получаете -->
-    <section class="features">
+    <!-- Раздел 1: Что даёт анализ (цифры и метрики, а не карточки) -->
+    <section class="metrics-section">
       <div class="container">
-        <h2>Что показывает анализ</h2>
-        <div class="features-grid">
-          <div class="feature-card">
-            <h3>Выручка и прибыль</h3>
-            <p>Сколько осталось после всех вычетов</p>
+        <h2>Что вы получаете</h2>
+        <div class="metrics-list">
+          <div class="metric-row">
+            <div class="metric-number">01</div>
+            <div class="metric-text">
+              <strong>Выручка и чистая прибыль</strong>
+              <span>Сколько реально осталось после всех вычетов, возвратов и комиссий.</span>
+            </div>
           </div>
-          <div class="feature-card">
-            <h3>Комиссии и логистика</h3>
-            <p>Сколько забрал маркетплейс</p>
+          <div class="metric-row">
+            <div class="metric-number">02</div>
+            <div class="metric-text">
+              <strong>Расходы на логистику и хранение</strong>
+              <span>Сколько забирает маркетплейс за доставку и склады.</span>
+            </div>
           </div>
-          <div class="feature-card">
-            <h3>Возвраты</h3>
-            <p>Какие товары возвращают и сколько это стоит</p>
+          <div class="metric-row">
+            <div class="metric-number">03</div>
+            <div class="metric-text">
+              <strong>Влияние возвратов</strong>
+              <span>Какие товары возвращают чаще и сколько это стоит.</span>
+            </div>
           </div>
-          <div class="feature-card">
-            <h3>Топ товаров</h3>
-            <p>Что приносит прибыль, а что — убытки</p>
+          <div class="metric-row">
+            <div class="metric-number">04</div>
+            <div class="metric-text">
+              <strong>Unit-экономика товаров</strong>
+              <span>Прибыль с единицы, маржинальность, ROI — без ручных таблиц.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Раздел 2: Почему выбирают (вертикальная лента, не сетка) -->
+    <section class="features-list-section">
+      <div class="container">
+        <h2>Почему работают с нами</h2>
+        <div class="features-timeline">
+          <div class="timeline-item">
+            <div class="timeline-icon">⏱️</div>
+            <div class="timeline-content">
+              <h3>Загрузил → увидел прибыль</h3>
+              <p>Никаких ручных формул. Система сама считает выручку, расходы и налоги.</p>
+            </div>
+          </div>
+          <div class="timeline-item">
+            <div class="timeline-icon">💾</div>
+            <div class="timeline-content">
+              <h3>Данные не теряются</h3>
+              <p>Себестоимость сохраняется и подставляется в новые отчёты. Даже при сотнях артикулов.</p>
+            </div>
+          </div>
+          <div class="timeline-item">
+            <div class="timeline-icon">📆</div>
+            <div class="timeline-content">
+              <h3>Сводка за любой период</h3>
+              <p>Месяц, квартал, год — P&L собирается автоматически. Видно динамику.</p>
+            </div>
+          </div>
+          <div class="timeline-item">
+            <div class="timeline-icon">🔒</div>
+            <div class="timeline-content">
+              <h3>Ваши данные в безопасности</h3>
+              <p>Отчёты не передаются третьим. Защищённое соединение.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Раздел 3: Кому подходит (три столбца разной высоты) -->
+    <section class="audience-variety">
+      <div class="container">
+        <h2>Кому это нужно</h2>
+        <div class="audience-columns">
+          <div class="audience-col col-short">
+            <div class="col-header">📦</div>
+            <h3>Новички</h3>
+            <p>Перестаёте гадать. Сразу видите, какие товары в плюс, а какие тянут вниз.</p>
+          </div>
+          <div class="audience-col col-tall">
+            <div class="col-header">📊</div>
+            <h3>Опытные продавцы</h3>
+            <p>Вместо 2–3 часов в Excel — полная P&L-картина за пару минут. Экономите десятки часов в месяц.</p>
+          </div>
+          <div class="audience-col col-short">
+            <div class="col-header">🏢</div>
+            <h3>Управляющие</h3>
+            <p>Контроль юнит-экономики и ROI без ручного сбора данных по каждому менеджеру.</p>
           </div>
         </div>
       </div>
@@ -92,18 +159,13 @@
     <section class="creator-section">
       <div class="container creator-grid">
         <div class="creator-photo">
-          <img src="https://via.placeholder.com/400/cccccc/ffffff?text=Фото+Павла" alt="Павел">
+          <img src="https://via.placeholder.com/400x450/cccccc/ffffff?text=Павел" alt="Павел">
         </div>
         <div class="creator-info">
-          <h2>Привет, я Павел — создатель MarketEasy</h2>
-          <p>
-            Сам продаю на Wildberries с 2022 года.<br>
-            Устал часами разбирать отчёты, чтобы понять реальную прибыль.<br><br>
-            Создал этот сервис для себя — теперь делюсь с вами.
-          </p>
-          <p class="creator-quote">
-            "Хочу, чтобы каждый продавец видел свои деньги ясно — без лишней математики."
-          </p>
+          <h2>Привет, я Павел</h2>
+          <p>Сам продаю на Wildberries с 2022 года. Знаю, как тяжело разбирать отчёты, чтобы понять реальную прибыль.</p>
+          <p>MarketEasy создавался для себя — чтобы видеть цифры без лишней математики. Теперь делюсь с вами.</p>
+          <p class="creator-quote">«Тратьте время на бизнес, а не на Excel».</p>
         </div>
       </div>
     </section>
@@ -112,8 +174,8 @@
     <section class="cta-final">
       <div class="container">
         <h2>Готовы увидеть реальную картину?</h2>
-        <p>Загрузите отчёт — и получите анализ за секунды</p>
-        <a href="{{ url_for('register') }}" class="btn-cta">Начать бесплатно</a>
+        <p>Загрузите первый отчёт — и получите полный анализ за секунды</p>
+        <a href="{{ url_for('register') }}" class="btn-cta large">Начать бесплатно</a>
       </div>
     </section>
 
@@ -123,14 +185,9 @@
     <div class="container footer__inner">
       <div class="footer-left">
         <a href="{{ url_for('index') }}" class="logo-footer">MarketEasy</a>
-        <p class="footer-description">
-          Простая аналитика для продавцов Wildberries и Ozon
-        </p>
-        <p class="footer-copyright">
-          © 2025 MarketEasy. Все права защищены.
-        </p>
+        <p class="footer-description">Простая аналитика для продавцов Wildberries и Ozon</p>
+        <p class="footer-copyright">© 2025 MarketEasy. Все права защищены.</p>
       </div>
-
       <div class="footer-links">
         <h4>Навигация</h4>
         <ul>
@@ -140,7 +197,6 @@
           <li><a href="{{ url_for('about') }}">О нас</a></li>
         </ul>
       </div>
-
       <div class="footer-links">
         <h4>Поддержка</h4>
         <ul>
@@ -149,7 +205,6 @@
           <li><a href="#">Политика конфиденциальности</a></li>
         </ul>
       </div>
-
       <div class="footer-contact">
         <h4>Связаться с нами</h4>
         <p>support@marketeasy.ru</p>

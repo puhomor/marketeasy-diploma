@@ -1,9 +1,8 @@
-/* index.css — стили только для главной страницы */
+/* index.css — главная страница, без анимаций и AI-палева */
 
-/* Hero */
 .hero {
-  padding-top: 30px;
-  min-height: 90vh;
+  padding-top: 80px;
+  min-height: 80vh;
   display: flex;
   align-items: center;
   background: #ffffff;
@@ -12,89 +11,90 @@
 .hero__inner {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 60px;
+  gap: 50px;
   align-items: center;
 }
 
 .hero__content h1 {
-  font-size: 48px;
+  font-size: 44px;
   font-weight: 700;
-  color: #0f2e1a;
+  color: #1e293b;
   line-height: 1.2;
-  margin-bottom: 20px;
+  margin-bottom: 1rem;
 }
 
 .hero__subtitle {
-  font-size: 18px;
-  color: #4b5563;
-  margin-bottom: 32px;
+  font-size: 1rem;
+  color: #64748b;
+  margin-bottom: 2rem;
+  line-height: 1.5;
 }
 
 .hero__image img {
   width: 100%;
   border-radius: 16px;
-  box-shadow: 0 20px 35px -10px rgba(0,0,0,0.1);
 }
 
-/* Steps */
+/* Steps — без hover-анимаций */
 .steps {
-  padding: 30px 0;
-  background: #f9fafb;
+  padding: 60px 0;
+  background: #f8fafc;
   text-align: center;
 }
 
 .section-title {
-  font-size: 36px;
+  font-size: 32px;
   font-weight: 700;
-  color: #0f2e1a;
-  margin-bottom: 12px;
+  color: #1e293b;
+  margin-bottom: 0.8rem;
 }
 
 .section-subtitle {
-  font-size: 18px;
-  color: #6b7280;
-  margin-bottom: 48px;
+  font-size: 1rem;
+  color: #64748b;
+  margin-bottom: 3rem;
 }
 
 .steps-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 30px;
+  gap: 1.5rem;
+  max-width: 900px;
+  margin: 0 auto;
 }
 
 .step-card {
   background: white;
-  padding: 32px 24px;
-  border-radius: 20px;
-  box-shadow: 0 5px 20px rgba(0,0,0,0.05);
-  transition: transform 0.2s, box-shadow 0.2s;
-}
-
-.step-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+  padding: 2rem 1.5rem;
+  border-radius: 16px;
+  border: 1px solid #e2e8f0;
 }
 
 .step-number {
-  width: 56px;
-  height: 56px;
-  background: #15803d;
+  width: 48px;
+  height: 48px;
+  background: #1a3a1a;
   color: white;
-  font-size: 26px;
+  font-size: 1.3rem;
   font-weight: 700;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin: 0 auto 20px;
+  margin: 0 auto 1rem;
 }
 
 .step-card h3 {
-  font-size: 22px;
-  margin-bottom: 12px;
-  color: #1f2937;
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: #1e293b;
 }
 
 .step-card p {
-  color: #6b7280;
+  font-size: 0.85rem;
+  color: #64748b;
+  line-height: 1.4;
 }
+
+/* Футер не трогал */

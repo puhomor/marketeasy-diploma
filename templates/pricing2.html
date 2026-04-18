@@ -10,25 +10,21 @@
 </head>
 <body>
 
-  <!-- Шапка (точно как на главной) -->
   <header class="header">
     <div class="container header__inner">
       <a href="{{ url_for('index') }}" class="logo">MarketEasy</a>
       <nav class="nav">
-        <a href="{{ url_for('pricing2') }}" {% if request.path == '/pricing2' %}class="active"{% endif %}>Тарифы</a>
-        <a href="{{ url_for('contacts') }}" {% if request.path == '/contacts' %}class="active"{% endif %}>Контакты</a>
-        <a href="{{ url_for('about') }}" {% if request.path == '/about' %}class="active"{% endif %}>О нас</a>
-  
+        <a href="{{ url_for('pricing2') }}" class="active">Тарифы</a>
+        <a href="{{ url_for('contacts') }}">Контакты</a>
+        <a href="{{ url_for('about') }}">О нас</a>
         {% if 'user_id' in session %}
-        <!-- Авторизованный пользователь -->
-        {% if session.get('has_subscription') %}
-          <a href="{% if session.get('marketplace') == 'wildberries' %}{{ url_for('analytics_wb') }}{% else %}{{ url_for('analytics_ozon') }}{% endif %}" class="btn-login">Личный кабинет</a>
-        {% else %}
-          <a href="{{ url_for('pricing') }}" class="btn-login">Личный кабинет</a>
-        {% endif %}
+          {% if session.get('has_subscription') %}
+            <a href="{% if session.get('marketplace') == 'wildberries' %}{{ url_for('analytics_wb') }}{% else %}{{ url_for('analytics_ozon') }}{% endif %}" class="btn-login">Личный кабинет</a>
+          {% else %}
+            <a href="{{ url_for('pricing') }}" class="btn-login">Личный кабинет</a>
+          {% endif %}
           <a href="{{ url_for('logout') }}" class="btn-login">Выйти</a>
         {% else %}
-          <!-- Неавторизованный -->
           <a href="{{ url_for('login') }}" class="btn-login">Войти</a>
           <a href="{{ url_for('register') }}" class="btn-cta">Регистрация</a>
         {% endif %}
@@ -38,28 +34,13 @@
 
   <main class="pricing-page">
     <div class="container">
+
       <h1 class="page-title">Тарифы MarketEasy</h1>
-      <p class="page-subtitle">
-        Выберите подходящий тариф для анализа продаж на Wildberries и Ozon
-      </p>
+      <p class="page-subtitle">Выберите подходящий вариант для анализа продаж на Wildberries и Ozon</p>
 
-      <!-- Сообщение для незарегистрированных -->
-      {% if 'user_id' not in session %}
-        <div class="auth-message">
-          <div class="auth-card">
-            <h2>Чтобы выбрать тариф — сначала зарегистрируйтесь</h2>
-            <p>
-              После регистрации вы сможете активировать бесплатный тариф или перейти на платный.<br>
-              Регистрация займёт меньше минуты.
-            </p>
-          </div>
-        </div>
-      {% endif %}
-
-      <!-- Тарифы -->
+      <!-- Тарифы — без эмодзи и спикеров -->
       <div class="tariffs-grid">
-        <!-- Бесплатный -->
-        <div class="tariff-card free">
+        <div class="tariff-card">
           <h3>Бесплатный</h3>
           <div class="price">
             <span class="amount">0</span>
@@ -67,33 +48,29 @@
           </div>
           <ul class="features">
             <li>3 анализа отчёта в месяц</li>
-            <li>Основные метрики: выручка, прибыль, логистика</li>
+            <li>Выручка, прибыль, логистика</li>
             <li>Топ товаров</li>
             <li>Поддержка по email</li>
-            <li>Без рекламы</li>
           </ul>
-          <div class="tariff-note">Идеально для начала</div>
+          <div class="tariff-note">Для старта</div>
         </div>
 
-        <!-- Стандарт -->
-        <div class="tariff-card standard recommended">
-          <div class="recommended-badge">Рекомендуем</div>
+        <div class="tariff-card standard">
           <h3>Стандарт</h3>
           <div class="price">
             <span class="amount">3 000</span>
             <span class="currency">₽ / мес</span>
           </div>
           <ul class="features">
-            <li><strong>15 анализов в месяц</strong></li>
+            <li>15 анализов в месяц</li>
             <li>Все метрики + себестоимость</li>
-            <li>Графики и структура затрат</li>
+            <li>Графики затрат</li>
             <li>Экспорт в Excel</li>
             <li>Приоритетная поддержка</li>
           </ul>
           <div class="tariff-note">Для активных продавцов</div>
         </div>
 
-        <!-- Премиум -->
         <div class="tariff-card premium">
           <h3>Премиум</h3>
           <div class="price">
@@ -101,20 +78,19 @@
             <span class="currency">₽ / мес</span>
           </div>
           <ul class="features">
-            <li><strong>40 анализов в месяц</strong></li>
-            <li>Все возможности Стандарта</li>
+            <li>40 анализов в месяц</li>
             <li>Unit-экономика по артикулам</li>
             <li>Прогноз продаж</li>
-            <li>Персональная поддержка в Telegram</li>
-            <li>Доступ к бета-фичам</li>
+            <li>Персональная поддержка</li>
+            <li>Доступ к новым функциям</li>
           </ul>
           <div class="tariff-note">Для крупных продавцов</div>
         </div>
       </div>
 
+      <!-- FAQ без эмодзи -->
       <div class="faq-section">
         <h2>Часто задаваемые вопросы</h2>
-      
         <div class="faq-accordion">
           <div class="faq-item">
             <button class="faq-question">
@@ -122,78 +98,67 @@
               <span class="faq-toggle">+</span>
             </button>
             <div class="faq-answer">
-              <p>На бесплатном тарифе можно загрузить и проанализировать до 3 отчётов в месяц. Если нужно больше — выбирайте один из платных тарифов.</p>
+              <p>На бесплатном тарифе — до 3 отчётов в месяц. Если нужно больше, выбирайте платный тариф.</p>
             </div>
           </div>
-      
           <div class="faq-item">
             <button class="faq-question">
-              Что считается одним анализом отчёта?
+              Что считается одним анализом?
               <span class="faq-toggle">+</span>
             </button>
             <div class="faq-answer">
-              <p>Каждый загруженный файл (.xlsx) считается за один анализ, независимо от того, за неделю он или за месяц.</p>
+              <p>Каждый загруженный файл .xlsx считается за один анализ, независимо от периода.</p>
             </div>
           </div>
-      
           <div class="faq-item">
             <button class="faq-question">
-              Могу ли я сменить тариф в любой момент?
+              Можно ли сменить тариф в любой момент?
               <span class="faq-toggle">+</span>
             </button>
             <div class="faq-answer">
-              <p>Да, вы можете перейти на другой тариф в любой момент. Деньги за неиспользованный период возвращаются пропорционально.</p>
+              <p>Да. Деньги за неиспользованный период возвращаются пропорционально.</p>
             </div>
           </div>
-      
           <div class="faq-item">
             <button class="faq-question">
               Безопасны ли мои данные?
               <span class="faq-toggle">+</span>
             </button>
             <div class="faq-answer">
-              <p>Мы не храним ваши отчёты после анализа. Всё обрабатывается в памяти и удаляется сразу после завершения. Ваши данные никогда не передаются третьим лицам.</p>
+              <p>Отчёты не хранятся после анализа. Данные не передаются третьим лицам.</p>
             </div>
           </div>
-      
           <div class="faq-item">
             <button class="faq-question">
-              Как связаться с поддержкой, если возник вопрос?
+              Как связаться с поддержкой?
               <span class="faq-toggle">+</span>
             </button>
             <div class="faq-answer">
-              <p>Напишите нам на support@marketeasy.ru или в Telegram @marketeasy_support. Обычно отвечаем в течение нескольких часов.</p>
+              <p>Email: support@marketeasy.ru или Telegram @marketeasy_support. Отвечаем в течение нескольких часов.</p>
             </div>
           </div>
         </div>
       </div>
+
     </div>
   </main>
 
-  <!-- Футер (точно как на главной) -->
   <footer class="footer">
     <div class="container footer__inner">
       <div class="footer-left">
         <a href="{{ url_for('index') }}" class="logo-footer">MarketEasy</a>
-        <p class="footer-description">
-          Аналитика продаж Wildberries и Ozon за минуты.<br>
-          Принимайте решения на основе данных.
-        </p>
-        <p class="footer-copyright">
-          © 2025 MarketEasy. Все права защищены.
-        </p>
+        <p class="footer-description">Аналитика продаж Wildberries и Ozon за минуты. Принимайте решения на основе данных.</p>
+        <p class="footer-copyright">© 2025 MarketEasy. Все права защищены.</p>
       </div>
-
       <div class="footer-links">
         <h4>Навигация</h4>
         <ul>
-            <li><a href="{{ url_for('index') }}">Главная</a></li>
-            <li><a href="{{ url_for('pricing2') }}">Тарифы</a></li>
-            <li><a href="{{ url_for('contacts') }}">Контакты</a></li>
-            <li><a href="{{ url_for('about') }}">О нас</a></li>
+          <li><a href="{{ url_for('index') }}">Главная</a></li>
+          <li><a href="{{ url_for('pricing2') }}">Тарифы</a></li>
+          <li><a href="{{ url_for('contacts') }}">Контакты</a></li>
+          <li><a href="{{ url_for('about') }}">О нас</a></li>
         </ul>
       </div>
-
       <div class="footer-links">
         <h4>Поддержка</h4>
         <ul>
@@ -202,7 +167,6 @@
           <li><a href="#">Политика конфиденциальности</a></li>
         </ul>
       </div>
-
       <div class="footer-contact">
         <h4>Связаться с нами</h4>
         <p>support@marketeasy.ru</p>
@@ -210,6 +174,7 @@
       </div>
     </div>
   </footer>
+
   <script>
     document.querySelectorAll('.faq-question').forEach(button => {
       button.addEventListener('click', () => {

@@ -1,10 +1,10 @@
 .pricing-page {
-  padding: 140px 0 100px;
+  padding: 120px 0 80px;
   background: #f8fafc;
 }
 
 .page-title {
-  font-size: 48px;
+  font-size: 40px;
   font-weight: 700;
   text-align: center;
   color: #1e293b;
@@ -12,133 +12,133 @@
 }
 
 .page-subtitle {
-  font-size: 20px;
+  font-size: 1rem;
   text-align: center;
-  color: #475569;
-  max-width: 700px;
-  margin: 0 auto 4rem;
+  color: #64748b;
+  max-width: 600px;
+  margin: 0 auto 3rem;
 }
 
 /* Сообщение для незарегистрированных */
 .auth-message {
   text-align: center;
-  margin-bottom: 5rem;
+  margin-bottom: 3rem;
 }
 
 .auth-card {
   background: white;
-  padding: 3rem;
-  border-radius: 20px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-  max-width: 600px;
+  padding: 2rem;
+  border-radius: 16px;
+  border: 1px solid #e2e8f0;
+  max-width: 500px;
   margin: 0 auto;
 }
 
 .auth-card h2 {
-  font-size: 32px;
-  margin-bottom: 1.5rem;
+  font-size: 1.3rem;
+  margin-bottom: 0.8rem;
   color: #1e293b;
 }
 
 .auth-card p {
-  font-size: 18px;
-  color: #475569;
-  margin-bottom: 2rem;
+  font-size: 0.85rem;
+  color: #64748b;
+  margin-bottom: 1.5rem;
 }
 
 .auth-buttons {
   display: flex;
   gap: 1rem;
   justify-content: center;
-  flex-wrap: wrap;
 }
 
-.btn-secondary {
-  background: transparent;
-  color: #2e7d32;
-  border: 2px solid #2e7d32;
-  padding: 0.8rem 2rem;
-  border-radius: 50px;
-  font-weight: 600;
+.btn-register {
+  background: #1a3a1a;
+  color: white;
+  padding: 0.6rem 1.5rem;
+  border-radius: 40px;
   text-decoration: none;
-  transition: all 0.3s;
+  font-size: 0.85rem;
+  font-weight: 500;
 }
 
-.btn-secondary:hover {
+.btn-register:hover {
+  background: #2d4a2d;
+}
+
+.btn-login-link {
+  background: transparent;
+  color: #1a3a1a;
+  border: 1px solid #1a3a1a;
+  padding: 0.6rem 1.5rem;
+  border-radius: 40px;
+  text-decoration: none;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.btn-login-link:hover {
   background: #f0fdf4;
 }
 
-/* Тарифы */
+/* Тарифы — без анимаций при наведении */
 .tariffs-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-  gap: 2rem;
-  margin-bottom: 5rem;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+  margin-bottom: 4rem;
+  max-width: 1000px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .tariff-card {
   background: white;
-  padding: 2.5rem;
-  border-radius: 20px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+  padding: 1.8rem;
+  border-radius: 16px;
+  border: 1px solid #e2e8f0;
   text-align: center;
-  position: relative;
-  transition: transform 0.3s;
 }
 
-.tariff-card:hover {
-  transform: translateY(-10px);
-}
-
-.recommended {
-  border: 3px solid #2e7d32;
-}
-
-.recommended-badge {
-  position: absolute;
-  top: -12px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: #2e7d32;
-  color: white;
-  padding: 0.5rem 1.5rem;
-  border-radius: 50px;
-  font-size: 14px;
-  font-weight: 600;
+.tariff-card.standard {
+  border-color: #1a3a1a;
+  background: #fefdf8;
 }
 
 .tariff-card h3 {
-  font-size: 28px;
-  margin-bottom: 1.5rem;
+  font-size: 1.3rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
   color: #1e293b;
 }
 
 .price {
-  margin: 2rem 0;
+  margin: 1rem 0;
 }
 
 .amount {
-  font-size: 48px;
+  font-size: 2.2rem;
   font-weight: 700;
   color: #1e293b;
 }
 
 .currency {
-  font-size: 20px;
+  font-size: 0.9rem;
   color: #64748b;
 }
 
 .features {
   list-style: none;
   text-align: left;
-  margin: 2rem 0;
+  margin: 1.5rem 0;
+  padding: 0;
 }
 
 .features li {
-  padding: 0.8rem 0;
-  border-bottom: 1px solid #e5e7eb;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #f0f2f5;
   color: #475569;
-  font-size: 16px;
+  font-size: 0.8rem;
 }
 
 .features li:last-child {
@@ -146,76 +146,72 @@
 }
 
 .tariff-note {
-  margin-top: 2rem;
-  font-size: 16px;
-  color: #64748b;
+  margin-top: 1rem;
+  font-size: 0.75rem;
+  color: #94a3b8;
   font-style: italic;
 }
 
 /* FAQ — аккордеон */
 .faq-section {
-  max-width: 800px;
+  max-width: 700px;
   margin: 0 auto;
 }
 
 .faq-section h2 {
   text-align: center;
-  font-size: 36px;
-  margin-bottom: 3rem;
+  font-size: 1.5rem;
+  margin-bottom: 2rem;
   color: #1e293b;
 }
 
-.faq-accordion {
-  margin: 0 auto;
-}
-
 .faq-item {
-  margin-bottom: 1rem;
+  margin-bottom: 0.8rem;
   background: white;
   border-radius: 12px;
+  border: 1px solid #e2e8f0;
   overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
 }
 
 .faq-question {
   width: 100%;
-  padding: 1.2rem 1.5rem;
-  background: #f8fafc;
+  padding: 1rem 1.2rem;
+  background: white;
   border: none;
   text-align: left;
-  font-size: 18px;
+  font-size: 0.9rem;
   font-weight: 600;
   color: #1e293b;
   cursor: pointer;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  transition: background 0.2s;
 }
 
 .faq-question:hover {
-  background: #f0f4f8;
+  background: #f8fafc;
 }
 
 .faq-toggle {
-  font-size: 24px;
+  font-size: 1.2rem;
   font-weight: 400;
-  color: #64748b;
-  transition: transform 0.3s;
+  color: #94a3b8;
 }
 
 .faq-item.open .faq-toggle {
-  transform: rotate(45deg);
+  content: "−";
 }
 
 .faq-answer {
   display: none;
-  padding: 0 1.5rem 1.5rem;
-  font-size: 16px;
-  color: #475569;
-  line-height: 1.7;
+  padding: 0 1.2rem 1rem;
+  font-size: 0.85rem;
+  color: #64748b;
+  line-height: 1.5;
 }
 
 .faq-item.open .faq-answer {
   display: block;
 }
+
+/* Футер не трогал — оставил как есть */

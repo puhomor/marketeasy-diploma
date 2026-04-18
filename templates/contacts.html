@@ -14,20 +14,17 @@
     <div class="container header__inner">
       <a href="{{ url_for('index') }}" class="logo">MarketEasy</a>
       <nav class="nav">
-        <a href="{{ url_for('pricing2') }}" {% if request.path == '/pricing2' %}class="active"{% endif %}>Тарифы</a>
-        <a href="{{ url_for('contacts') }}" {% if request.path == '/contacts' %}class="active"{% endif %}>Контакты</a>
-        <a href="{{ url_for('about') }}" {% if request.path == '/about' %}class="active"{% endif %}>О нас</a>
-  
+        <a href="{{ url_for('pricing2') }}">Тарифы</a>
+        <a href="{{ url_for('contacts') }}" class="active">Контакты</a>
+        <a href="{{ url_for('about') }}">О нас</a>
         {% if 'user_id' in session %}
-        <!-- Авторизованный пользователь -->
-        {% if session.get('has_subscription') %}
-          <a href="{% if session.get('marketplace') == 'wildberries' %}{{ url_for('analytics_wb') }}{% else %}{{ url_for('analytics_ozon') }}{% endif %}" class="btn-login">Личный кабинет</a>
-        {% else %}
-          <a href="{{ url_for('pricing') }}" class="btn-login">Личный кабинет</a>
-        {% endif %}
+          {% if session.get('has_subscription') %}
+            <a href="{% if session.get('marketplace') == 'wildberries' %}{{ url_for('analytics_wb') }}{% else %}{{ url_for('analytics_ozon') }}{% endif %}" class="btn-login">Личный кабинет</a>
+          {% else %}
+            <a href="{{ url_for('pricing') }}" class="btn-login">Личный кабинет</a>
+          {% endif %}
           <a href="{{ url_for('logout') }}" class="btn-login">Выйти</a>
         {% else %}
-          <!-- Неавторизованный -->
           <a href="{{ url_for('login') }}" class="btn-login">Войти</a>
           <a href="{{ url_for('register') }}" class="btn-cta">Регистрация</a>
         {% endif %}
@@ -37,95 +34,90 @@
 
   <main class="contacts-main">
     <div class="container">
-      <h1>Связаться с нами</h1>
-      <p class="contacts-subtitle">
-        Есть вопросы по работе сервиса, предложения или нашли ошибку?<br>
-        Напишите — ответим в течение суток.
-      </p>
 
-      <div class="contacts-grid">
-        <!-- Карточка email -->
-        <div class="contact-card">
-          <div class="contact-icon">✉️</div>
-          <h3>Email</h3>
-          <p class="contact-info">support@marketeasy.ru</p>
-          <a href="mailto:support@marketeasy.ru" class="contact-link">Написать письмо</a>
+      <!-- Заголовок -->
+      <div class="contacts-header">
+        <h1>Связаться с нами</h1>
+        <p>Вопросы по работе сервиса, предложения или нашли ошибку?<br>Ответим в течение суток.</p>
+      </div>
+
+      <!-- Контакты — не карточки, а простой список -->
+      <div class="contacts-info">
+        <div class="contact-line">
+          <span class="contact-label">Email</span>
+          <span class="contact-value">support@marketeasy.ru</span>
+          <a href="mailto:support@marketeasy.ru" class="contact-action">написать</a>
         </div>
-
-        <!-- Карточка Telegram -->
-        <div class="contact-card">
-          <div class="contact-icon">✈️</div>
-          <h3>Telegram</h3>
-          <p class="contact-info">@marketeasy_support</p>
-          <a href="https://t.me/marketeasy_support" target="_blank" class="contact-link">Перейти в чат</a>
+        <div class="contact-line">
+          <span class="contact-label">Telegram</span>
+          <span class="contact-value">@marketeasy_support</span>
+          <a href="https://t.me/marketeasy_support" target="_blank" class="contact-action">написать</a>
         </div>
-
-        <!-- Карточка времени ответа -->
-        <div class="contact-card">
-          <div class="contact-icon">⏰</div>
-          <h3>Время ответа</h3>
-          <p class="contact-info">Обычно в течение 1–24 часов</p>
-          <p class="contact-sub">Работаем с 10:00 до 20:00 (МСК)</p>
+        <div class="contact-line">
+          <span class="contact-label">Время ответа</span>
+          <span class="contact-value">1–24 часа</span>
+          <span class="contact-note">работаем 10:00–20:00 МСК</span>
         </div>
       </div>
 
+      <!-- Форма обратной связи (без лишних карточек) -->
       <div class="feedback-form">
         <h2>Обратная связь</h2>
         <p>Оставьте контакты — мы свяжемся с вами в течение суток</p>
-      
+
         {% with messages = get_flashed_messages(with_categories=true) %}
           {% if messages %}
-            <div class="flash-messages form-flash">
+            <div class="flash-messages">
               {% for category, message in messages %}
                 <div class="alert alert-{{ category }}">{{ message }}</div>
               {% endfor %}
             </div>
           {% endif %}
         {% endwith %}
-      
+
         <form method="POST" action="{{ url_for('submit_feedback') }}">
-          <div class="form-group">
-            <label for="name">Ваше имя *</label>
-            <input type="text" id="name" name="name" required placeholder="Павел">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="name">Имя</label>
+              <input type="text" id="name" name="name" required placeholder="Павел">
+            </div>
+            <div class="form-group">
+              <label for="phone">Телефон</label>
+              <input type="tel" id="phone" name="phone" required placeholder="+7 (999) 123-45-67">
+            </div>
           </div>
-          
+
           <div class="form-group">
-            <label for="phone">Номер телефона *</label>
-            <input type="tel" id="phone" name="phone" required placeholder="+7 (999) 123-45-67">
-          </div>
-      
-          <div class="form-group">
-            <label for="reason">По какому поводу обращение *</label>
-            <select id="reason" name="reason" required class="form-select">
+            <label for="reason">Тема обращения</label>
+            <select id="reason" name="reason" required>
               <option value="" disabled selected>Выберите причину</option>
               <option value="Вопрос по работе сервиса">Вопрос по работе сервиса</option>
               <option value="Предложение по улучшению">Предложение по улучшению</option>
-              <option value="Нашел ошибку">Нашел ошибку</option>
+              <option value="Нашел ошибку">Нашёл ошибку</option>
               <option value="Хочу платный тариф">Хочу платный тариф</option>
               <option value="Другое">Другое</option>
             </select>
           </div>
-      
-          <!-- Поле для описания — показывается только при "Другое" -->
+
           <div class="form-group" id="other-reason-group" style="display: none;">
-            <label for="other_reason">Опишите подробнее *</label>
-            <textarea id="other_reason" name="other_reason" rows="4" placeholder="Расскажите, что случилось или что хотите предложить"></textarea>
+            <label for="other_reason">Подробнее</label>
+            <textarea id="other_reason" name="other_reason" rows="3" placeholder="Расскажите подробнее"></textarea>
           </div>
-      
-          <button type="submit" class="btn-analyze">Отправить заявку</button>
+
+          <button type="submit" class="btn-submit">Отправить</button>
         </form>
-      
-        <p class="form-note">
-          * Обязательные поля. Мы не рассылаем спам и не передаём данные третьим лицам.
-        </p>
+
+        <p class="form-note">Не рассылаем спам. Данные не передаём третьим.</p>
       </div>
+
     </div>
   </main>
+
   <script>
     const reasonSelect = document.getElementById('reason');
     const otherReasonGroup = document.getElementById('other-reason-group');
     const otherReasonTextarea = document.getElementById('other_reason');
-  
+
     reasonSelect.addEventListener('change', function() {
       if (this.value === 'Другое') {
         otherReasonGroup.style.display = 'block';
@@ -137,43 +129,38 @@
       }
     });
   </script>
+
   <footer class="footer">
-      <div class="container footer__inner">
-        <div class="footer-left">
-          <a href="{{ url_for('index') }}" class="logo-footer">MarketEasy</a>
-          <p class="footer-description">
-            Простая аналитика для продавцов Wildberries и Ozon
-          </p>
-          <p class="footer-copyright">
-            © 2025 MarketEasy. Все права защищены.
-          </p>
-        </div>
-  
-        <div class="footer-links">
-          <h4>Навигация</h4>
-          <ul>
-            <li><a href="{{ url_for('index') }}">Главная</a></li>
-            <li><a href="{{ url_for('pricing2') }}">Тарифы</a></li>
-            <li><a href="{{ url_for('contacts') }}">Контакты</a></li>
-            <li><a href="{{ url_for('about') }}">О нас</a></li>
-          </ul>
-        </div>
-  
-        <div class="footer-links">
-          <h4>Поддержка</h4>
-          <ul>
-            <li><a href="#">Помощь</a></li>
-            <li><a href="#">Условия использования</a></li>
-            <li><a href="#">Политика конфиденциальности</a></li>
-          </ul>
-        </div>
-  
-        <div class="footer-contact">
-          <h4>Связаться с нами</h4>
-          <p>support@marketeasy.ru</p>
-          <p>+7 (999) 123-45-67</p>
-        </div>
+    <div class="container footer__inner">
+      <div class="footer-left">
+        <a href="{{ url_for('index') }}" class="logo-footer">MarketEasy</a>
+        <p class="footer-description">Простая аналитика для продавцов Wildberries и Ozon</p>
+        <p class="footer-copyright">© 2025 MarketEasy. Все права защищены.</p>
       </div>
+      <div class="footer-links">
+        <h4>Навигация</h4>
+        <ul>
+          <li><a href="{{ url_for('index') }}">Главная</a></li>
+          <li><a href="{{ url_for('pricing2') }}">Тарифы</a></li>
+          <li><a href="{{ url_for('contacts') }}">Контакты</a></li>
+          <li><a href="{{ url_for('about') }}">О нас</a></li>
+        </ul>
+      </div>
+      <div class="footer-links">
+        <h4>Поддержка</h4>
+        <ul>
+          <li><a href="#">Помощь</a></li>
+          <li><a href="#">Условия использования</a></li>
+          <li><a href="#">Политика конфиденциальности</a></li>
+        </ul>
+      </div>
+      <div class="footer-contact">
+        <h4>Связаться с нами</h4>
+        <p>support@marketeasy.ru</p>
+        <p>+7 (999) 123-45-67</p>
+      </div>
+    </div>
   </footer>
+
 </body>
 </html>

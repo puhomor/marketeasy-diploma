@@ -1,163 +1,203 @@
-/* contacts.css — стили только для страницы контактов */
+/* contacts.css — страница контактов, без однотипных карточек */
 
 .contacts-page {
   background: #f8fafc;
+  font-family: 'Inter', sans-serif;
 }
 
 .contacts-main {
-  padding: 140px 0 100px;
-  min-height: 80vh;
+  padding: 120px 0 80px;
+  min-height: 70vh;
 }
 
-.contacts-main h1 {
-  font-size: 48px;
-  color: #1e293b;
+.contacts-main .container {
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+/* ===== Заголовок ===== */
+.contacts-header {
   text-align: center;
-  margin-bottom: 1.5rem;
+  margin-bottom: 3rem;
 }
 
-.contacts-subtitle {
-  font-size: 20px;
-  color: #475569;
-  text-align: center;
-  max-width: 800px;
-  margin: 0 auto 4rem;
-  line-height: 1.6;
-}
-
-/* Карточки контактов */
-.contacts-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 2rem;
-  margin-bottom: 5rem;
-}
-
-.contact-card {
-  background: white;
-  padding: 3rem 2rem;
-  border-radius: 20px;
-  text-align: center;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.08);
-  transition: transform 0.3s;
-}
-
-.contact-card:hover {
-  transform: translateY(-10px);
-}
-
-.contact-icon {
-  font-size: 48px;
-  margin-bottom: 1.5rem;
-}
-
-.contact-card h3 {
-  font-size: 24px;
+.contacts-header h1 {
+  font-size: 40px;
   color: #1e293b;
   margin-bottom: 1rem;
+  font-weight: 700;
 }
 
-.contact-info {
-  font-size: 18px;
+.contacts-header p {
+  font-size: 1rem;
   color: #64748b;
-  margin-bottom: 1.5rem;
+  line-height: 1.5;
+}
+
+/* ===== Контакты — простой список, не карточки ===== */
+.contacts-info {
+  background: white;
+  border-radius: 16px;
+  border: 1px solid #e2e8f0;
+  overflow: hidden;
+  margin-bottom: 3rem;
+}
+
+.contact-line {
+  display: flex;
+  align-items: center;
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid #f0f2f5;
+}
+
+.contact-line:last-child {
+  border-bottom: none;
+}
+
+.contact-label {
+  width: 110px;
+  font-weight: 600;
+  color: #1e293b;
+  font-size: 0.85rem;
+}
+
+.contact-value {
+  flex: 1;
+  color: #475569;
+  font-size: 0.9rem;
+}
+
+.contact-action {
+  color: #1a3a1a;
+  text-decoration: none;
+  font-size: 0.8rem;
   font-weight: 500;
 }
 
-.contact-sub {
-  font-size: 16px;
+.contact-action:hover {
+  text-decoration: underline;
+}
+
+.contact-note {
+  font-size: 0.7rem;
   color: #94a3b8;
 }
 
-.contact-link {
-  display: inline-block;
-  color: #2e7d32;
-  font-weight: 600;
-  text-decoration: none;
-  font-size: 17px;
-  transition: color 0.3s;
-}
-
-.contact-link:hover {
-  color: #256f2a;
-}
-
-/* Форма обратной связи */
+/* ===== Форма обратной связи ===== */
 .feedback-form {
-  max-width: 600px;
-  margin: 5rem auto 0;
   background: white;
-  padding: 3rem;
   border-radius: 20px;
-  box-shadow: 0 15px 40px rgba(0,0,0,0.1);
-  text-align: center;
+  border: 1px solid #e2e8f0;
+  padding: 2rem;
 }
 
 .feedback-form h2 {
-  font-size: 36px;
+  font-size: 1.5rem;
   color: #1e293b;
-  margin-bottom: 1rem;
+  margin-bottom: 0.5rem;
+  text-align: center;
 }
 
-.feedback-form p {
+.feedback-form > p {
+  text-align: center;
   color: #64748b;
-  margin-bottom: 2.5rem;
-  font-size: 18px;
+  font-size: 0.85rem;
+  margin-bottom: 1.8rem;
 }
 
-.form-flash {
-  margin-bottom: 2rem;
+/* Flash-сообщения */
+.flash-messages {
+  margin-bottom: 1.5rem;
 }
 
-.feedback-form .form-group {
-  margin-bottom: 2rem;
-  text-align: left;
+.alert {
+  padding: 0.8rem;
+  border-radius: 10px;
+  font-size: 0.85rem;
 }
 
-.feedback-form label {
+.alert-success {
+  background: #f0fdf4;
+  color: #166534;
+  border: 1px solid #bbf7d0;
+}
+
+.alert-error {
+  background: #fef2f2;
+  color: #991b1b;
+  border: 1px solid #fecaca;
+}
+
+/* Форма */
+.form-row {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.2rem;
+}
+
+.form-row .form-group {
+  flex: 1;
+  margin-bottom: 0;
+}
+
+.form-group {
+  margin-bottom: 1.2rem;
+}
+
+.form-group label {
   display: block;
-  margin-bottom: 0.8rem;
+  font-size: 0.75rem;
   font-weight: 600;
-  color: #1e293b;
-  font-size: 17px;
+  color: #475569;
+  margin-bottom: 0.3rem;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
 }
 
-.feedback-form input,
-.feedback-form textarea {
+.form-group input,
+.form-group select,
+.form-group textarea {
   width: 100%;
-  padding: 1.2rem;
+  padding: 0.8rem;
   border: 1px solid #e2e8f0;
-  border-radius: 12px;
-  font-size: 17px;
-  transition: border 0.3s;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  font-family: inherit;
+  background: white;
 }
 
-.feedback-form input:focus,
-.feedback-form textarea:focus {
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
   outline: none;
-  border-color: #2e7d32;
-  box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.1);
+  border-color: #1a3a1a;
 }
 
-.feedback-form textarea {
-  min-height: 120px;
+.form-group textarea {
   resize: vertical;
+  min-height: 80px;
 }
 
-.feedback-form .btn-analyze {
+.btn-submit {
   width: 100%;
-  padding: 1.2rem;
-  font-size: 20px;
+  background: #1a3a1a;
+  color: white;
+  border: none;
+  padding: 0.9rem;
+  font-size: 1rem;
+  font-weight: 600;
+  border-radius: 40px;
+  cursor: pointer;
+  margin-top: 0.5rem;
+}
+
+.btn-submit:hover {
+  background: #2d4a2d;
 }
 
 .form-note {
-  margin-top: 2rem;
-  font-size: 14px;
+  text-align: center;
+  font-size: 0.7rem;
   color: #94a3b8;
-  font-style: italic;
-}
-
-/* Показ/скрытие поля "Другое" */
-#other-reason-group {
-  margin-bottom: 2rem;
+  margin-top: 1.5rem;
 }

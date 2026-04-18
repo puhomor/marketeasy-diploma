@@ -10,15 +10,13 @@
 </head>
 <body>
 
-  <!-- Шапка -->
   <header class="header">
     <div class="container header__inner">
       <a href="{{ url_for('index') }}" class="logo">MarketEasy</a>
       <nav class="nav">
-        <a href="{{ url_for('pricing2') }}" {% if request.path == '/pricing2' %}class="active"{% endif %}>Тарифы</a>
-        <a href="{{ url_for('contacts') }}" {% if request.path == '/contacts' %}class="active"{% endif %}>Контакты</a>
-        <a href="{{ url_for('about') }}" {% if request.path == '/about' %}class="active"{% endif %}>О нас</a>
-  
+        <a href="{{ url_for('pricing2') }}">Тарифы</a>
+        <a href="{{ url_for('contacts') }}">Контакты</a>
+        <a href="{{ url_for('about') }}">О нас</a>
         {% if 'user_id' in session %}
           {% if session.get('has_subscription') %}
             <a href="{% if session.get('marketplace') == 'wildberries' %}{{ url_for('analytics_wb') }}{% else %}{{ url_for('analytics_ozon') }}{% endif %}" class="btn-login">Личный кабинет</a>
@@ -34,12 +32,11 @@
     </div>
   </header>
 
-  <!-- Hero -->
   <main class="hero">
     <div class="container hero__inner">
       <div class="hero__content">
         <h1>Аналитика Wildberries и Ozon за 2 минуты</h1>
-        <p class="hero__subtitle">Загрузите отчёт — и через 5 секунд увидите, где прибыль, а где убытки.</p>
+        <p class="hero__subtitle">Загрузите отчёт — и через несколько секунд увидите, где прибыль, а где убытки.</p>
         <a href="{{ url_for('register') }}" class="btn-cta">Попробовать бесплатно</a>
       </div>
       <div class="hero__image">
@@ -48,33 +45,29 @@
     </div>
   </main>
 
-  <!-- Как это работает -->
   <section class="steps">
     <div class="container">
       <h2 class="section-title">Как это работает</h2>
-      <p class="section-subtitle">Загрузите отчёт и получите полный анализ за пару секунд</p>
-
+      <p class="section-subtitle">Загрузите отчёт и получите полный анализ за несколько секунд</p>
       <div class="steps-grid">
         <div class="step-card">
           <div class="step-number">1</div>
-          <h3>Загрузите отчёт</h3>
+          <h3>Загрузить отчёт</h3>
           <p>Скачайте отчёт о продажах с Wildberries или Ozon и загрузите в сервис</p>
         </div>
         <div class="step-card">
           <div class="step-number">2</div>
-          <h3>Увидите результаты</h3>
+          <h3>Увидеть результаты</h3>
           <p>Выручка, маржинальность, убыточные товары и наглядные графики</p>
         </div>
         <div class="step-card">
           <div class="step-number">3</div>
-          <h3>Получите рекомендации</h3>
+          <h3>Получить рекомендации</h3>
           <p>Узнайте, как сократить расходы и увеличить прибыль</p>
         </div>
       </div>
     </div>
   </section>
-
-  <script src="{{ url_for('static', filename='js/script.js') }}"></script>
 
   <footer class="footer">
     <div class="container footer__inner">
@@ -107,5 +100,6 @@
       </div>
     </div>
   </footer>
+
 </body>
 </html>

@@ -155,9 +155,14 @@
             <div class="wb-summary">
               <h3>Сводка от Wildberries</h3>
               <table class="summary-table">
+                <!-- НОВАЯ СТРОКА: Общая выручка -->
+                <tr>
+                  <td>Общая выручка:</td>
+                  <td>{{ analysis_result.articles | sum(attribute='revenue') | round(0) | int | string | replace(",", " ") }} ₽</td>
+                </tr>
                 <tr>
                   <td>Продажа (с учетом возвратов):</td>
-                  <td><strong>{{ analysis_result.revenue | round(0) | int | string | replace(",", " ") }} ₽</strong></td>
+                  <td>{{ analysis_result.revenue | round(0) | int | string | replace(",", " ") }} ₽</td>
                 </tr>
                 <tr>
                   <td>К перечислению за товар:</td>
@@ -456,11 +461,11 @@
           const revenue = parseFloat(revenueText) || 0;
           totalArticlesRevenue += revenue;
       });
+      
+      // Обновляем строку "Общая выручка"
       const totalArticlesRevenueElement = document.getElementById('totalArticlesRevenue');
       if (totalArticlesRevenueElement) {
           totalArticlesRevenueElement.textContent = totalArticlesRevenue.toLocaleString('ru-RU') + ' ₽';
-          // Добавляем пояснение
-          totalArticlesRevenueElement.parentElement.previousElementSibling.textContent = 'Выручка по розничным ценам:';
       }
     }
 

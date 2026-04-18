@@ -684,3 +684,14 @@ body.dragging {
   background: #f57c00;
   transform: translateY(-1px);
 }
+
+/* Стиль для строки общей выручки */
+#total-revenue-row td:first-child {
+  color: #4c1d95;
+  font-weight: 500;
+}
+
+#total-revenue-row td:last-child strong {
+  color: #9333ea;
+  font-size: 1.1em;
+}

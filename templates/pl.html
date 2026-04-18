@@ -79,7 +79,11 @@
                         <span class="summary-value" id="summaryCount">0</span>
                     </div>
                     <div class="summary-item">
-                        <span class="summary-label">Выручка:</span>
+                        <span class="summary-label">Общая выручка:</span>
+                        <span class="summary-value" id="summaryArticlesRevenue">0 ₽</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-label">Продажа:</span>
                         <span class="summary-value" id="summaryRevenue">0 ₽</span>
                     </div>
                     <div class="summary-item">
@@ -167,11 +171,11 @@
                     
                     <div class="pl-card-stats">
                         <div class="stat-item">
-                            <span class="stat-label">Товаров:</span>
-                            <span class="stat-value">{{ report.article_count }}</span>
+                            <span class="stat-label">Общая выручка:</span>
+                            <span class="stat-value revenue">{{ "{:,.2f}".format(report.articles_total_revenue).replace(',', ' ') }} ₽</span>
                         </div>
                         <div class="stat-item">
-                            <span class="stat-label">Выручка:</span>
+                            <span class="stat-label">Продажа:</span>
                             <span class="stat-value revenue">{{ "{:,.2f}".format(report.revenue).replace(',', ' ') }} ₽</span>
                         </div>
                         <div class="stat-item">
@@ -372,31 +376,29 @@
                 }
                 
                 card.innerHTML = `
-                <div class="pl-card-header">
-                    <div class="pl-card-header-top">
-                        <h3>
-                            ${reportTypeText}
-                        </h3>
-                        <button class="delete-report-btn" data-report-id="${report.id}" title="Удалить отчет">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M3 6h18"></path>
-                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path>
-                                <path d="M8 4V3a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v1"></path>
-                                <line x1="10" y1="11" x2="10" y2="17"></line>
-                                <line x1="14" y1="11" x2="14" y2="17"></line>
-                            </svg>
-                        </button>
+                    <div class="pl-card-header">
+                        <div class="pl-card-header-top">
+                            <h3>${reportTypeText}</h3>
+                            <button class="delete-report-btn" data-report-id="${report.id}" title="Удалить отчет">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M3 6h18"></path>
+                                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path>
+                                    <path d="M8 4V3a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v1"></path>
+                                    <line x1="10" y1="11" x2="10" y2="17"></line>
+                                    <line x1="14" y1="11" x2="14" y2="17"></line>
+                                </svg>
+                            </button>
+                        </div>
+                        <div class="report-period-date">${escapeHtml(report.report_period)}</div>
+                        <span class="report-date">Загружен: ${formattedDate} ${formattedTime}</span>
                     </div>
-                    <div class="report-period-date">${escapeHtml(report.report_period)}</div>
-                    <span class="report-date">Загружен: ${formattedDate} ${formattedTime}</span>
-                </div>
                     <div class="pl-card-stats">
                         <div class="stat-item">
-                            <span class="stat-label">Товаров:</span>
-                            <span class="stat-value">${report.article_count}</span>
+                            <span class="stat-label">Общая выручка:</span>
+                            <span class="stat-value revenue">${formatMoney(report.articles_total_revenue || 0)}</span>
                         </div>
                         <div class="stat-item">
-                            <span class="stat-label">Выручка:</span>
+                            <span class="stat-label">Продажа:</span>
                             <span class="stat-value revenue">${formatMoney(report.revenue)}</span>
                         </div>
                         <div class="stat-item">
@@ -408,7 +410,7 @@
                             <span class="stat-value expense">${formatMoney(report.storage)}</span>
                         </div>
                         <div class="stat-item">
-                            <span class="stat-label">Прочие удержания:</span>
+                            <span class="stat-label">Реклама:</span>
                             <span class="stat-value expense">${formatMoney(report.other_deductions)}</span>
                         </div>
                         <div class="stat-item">
@@ -440,6 +442,7 @@
         function updateSummary(reports) {
             const summary = {
                 count: reports.length,
+                articles_total_revenue: 0,
                 revenue: 0,
                 logistics: 0,
                 storage: 0,
@@ -450,6 +453,7 @@
             };
             
             reports.forEach(report => {
+                summary.articles_total_revenue += report.articles_total_revenue || 0;
                 summary.revenue += report.revenue;
                 summary.logistics += report.logistics;
                 summary.storage += report.storage;
@@ -467,6 +471,7 @@
                 summaryTitle.textContent = currentFilter === 'all' ? 'Сводка за все время' : 'Сводка за выбранный период';
                 
                 document.getElementById('summaryCount').textContent = summary.count;
+                document.getElementById('summaryArticlesRevenue').textContent = formatMoney(summary.articles_total_revenue);
                 document.getElementById('summaryRevenue').textContent = formatMoney(summary.revenue);
                 document.getElementById('summaryLogistics').textContent = formatMoney(summary.logistics);
                 document.getElementById('summaryStorage').textContent = formatMoney(summary.storage);

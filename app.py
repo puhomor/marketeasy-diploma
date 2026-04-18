@@ -1121,15 +1121,16 @@ def pl():
         
         reports = cur.fetchall()
         
-        # Для каждого отчета получаем количество артикулов
+        # Для каждого отчета получаем количество артикулов и общую выручку по артикулам
         for report in reports:
             cur.execute("""
-                SELECT COUNT(*) as article_count
+                SELECT COUNT(*) as article_count, SUM(revenue) as articles_total_revenue
                 FROM user_products 
                 WHERE report_id = %s
             """, (report['id'],))
             result = cur.fetchone()
             report['article_count'] = result['article_count'] if result else 0
+            report['articles_total_revenue'] = float(result['articles_total_revenue']) if result and result['articles_total_revenue'] else 0
             
         print(f"Найдено отчетов: {len(reports)}")
         
@@ -1157,7 +1158,6 @@ def pl_filter():
     
     try:
         if report_ids:
-            # Получаем выбранные отчеты с report_type
             placeholders = ','.join(['%s'] * len(report_ids))
             cur.execute(f"""
                 SELECT id, report_period, start_date, end_date, 
@@ -1168,7 +1168,6 @@ def pl_filter():
                 ORDER BY created_at DESC
             """, [session['user_id']] + report_ids)
         else:
-            # Все отчеты пользователя с report_type
             cur.execute("""
                 SELECT id, report_period, start_date, end_date, 
                        revenue, logistics, storage, other_deductions, 
@@ -1180,34 +1179,41 @@ def pl_filter():
         
         reports = cur.fetchall()
         
-        # Для каждого отчета получаем количество артикулов
+        reports_data = []
         for report in reports:
+            # Получаем общую выручку по артикулам
+            cur.execute("""
+                SELECT SUM(revenue) as articles_total_revenue
+                FROM user_products 
+                WHERE report_id = %s
+            """, (report['id'],))
+            result = cur.fetchone()
+            articles_total_revenue = float(result['articles_total_revenue']) if result and result['articles_total_revenue'] else 0
+            
             cur.execute("""
                 SELECT COUNT(*) as article_count
                 FROM user_products 
                 WHERE report_id = %s
             """, (report['id'],))
-            result = cur.fetchone()
-            report['article_count'] = result['article_count'] if result else 0
-        
-        # Форматируем для JSON
-        reports_data = []
-        for report in reports:
+            count_result = cur.fetchone()
+            article_count = count_result['article_count'] if count_result else 0
+            
             reports_data.append({
                 'id': report['id'],
                 'report_period': report['report_period'],
                 'start_date': report['start_date'].isoformat() if report['start_date'] else None,
                 'end_date': report['end_date'].isoformat() if report['end_date'] else None,
                 'revenue': float(report['revenue']) if report['revenue'] else 0,
+                'articles_total_revenue': articles_total_revenue,
+                'article_count': article_count,
                 'logistics': float(report['logistics']) if report['logistics'] else 0,
                 'storage': float(report['storage']) if report['storage'] else 0,
                 'other_deductions': float(report['other_deductions']) if report['other_deductions'] else 0,
                 'itogo_k_oplate': float(report['itogo_k_oplate']) if report['itogo_k_oplate'] else 0,
                 'tax_amount': float(report['tax_amount']) if report['tax_amount'] else 0,
                 'net_profit': float(report['net_profit']) if report['net_profit'] else 0,
-                'article_count': report['article_count'],
                 'created_at': report['created_at'].isoformat() if report['created_at'] else None,
-                'report_type': report['report_type'] if report['report_type'] else 'main'  # ← ДОБАВИТЬ ЭТУ СТРОКУ
+                'report_type': report['report_type'] if report['report_type'] else 'main'
             })
         
         return {"success": True, "reports": reports_data}

@@ -282,10 +282,10 @@ def analytics_wb(report_id=None):
         conn = get_db_connection()
         cur = conn.cursor()
         try:
-            # Получаем данные отчета
+            # Получаем данные отчета (включая k_perenum)
             cur.execute("""
                 SELECT id, report_period, revenue, logistics, storage, 
-                       other_deductions, itogo_k_oplate, tax_amount, net_profit,
+                       other_deductions, itogo_k_oplate, k_perenum, tax_amount, net_profit,
                        start_date, end_date
                 FROM user_reports 
                 WHERE id = %s AND user_id = %s
@@ -311,8 +311,9 @@ def analytics_wb(report_id=None):
                         'revenue': float(a['article_revenue']) if a['article_revenue'] else 0,
                         'cost': float(a['cost']) if a['cost'] else 0
                     })
-            
-                k_perenum = float(report['itogo_k_oplate']) if report['itogo_k_oplate'] else 0
+                
+                # k_perenum берем из отдельного поля в БД
+                k_perenum = float(report['k_perenum']) if report['k_perenum'] else 0
                 
                 report_data = {
                     'period': report['report_period'],
@@ -345,14 +346,10 @@ import pandas as pd
 from io import BytesIO
 
 def save_user_report(user_id, articles_data, period, analysis_result, report_type='main'):
-    """
-    Сохраняет отчет с базовыми P&L показателями
-    """
     conn = get_db_connection()
     cur = conn.cursor()
     
     try:
-        # Разбираем период на start_date и end_date
         start_date = None
         end_date = None
         if period and ' – ' in period:
@@ -363,12 +360,11 @@ def save_user_report(user_id, articles_data, period, analysis_result, report_typ
             except:
                 pass
         
-        # ВСЕГДА создаем новый отчет (не обновляем существующий)
         cur.execute("""
             INSERT INTO user_reports (
                 user_id, report_period, start_date, end_date,
-                revenue, logistics, storage, other_deductions, itogo_k_oplate, report_type
-            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                revenue, logistics, storage, other_deductions, itogo_k_oplate, k_perenum, report_type
+            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
             RETURNING id
         """, (user_id, period, start_date, end_date,
               analysis_result.get('revenue', 0),
@@ -376,12 +372,12 @@ def save_user_report(user_id, articles_data, period, analysis_result, report_typ
               analysis_result.get('storage', 0),
               analysis_result.get('other_deductions', 0),
               analysis_result.get('itogo_k_oplate', 0),
+              analysis_result.get('k_perenum', 0),  # ДОБАВЛЕНО!
               report_type))
         
         report_id = cur.fetchone()['id']
         print(f"Создан новый отчет {period} с ID: {report_id}, тип: {report_type}")
         
-        # Сохраняем артикулы
         for article in articles_data:
             cur.execute("""
                 INSERT INTO user_products (report_id, article, name, quantity, revenue, cost)

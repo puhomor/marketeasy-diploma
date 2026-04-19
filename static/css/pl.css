@@ -485,3 +485,226 @@ main {
     margin-bottom: 0.15rem;
     font-weight: normal;
 }
+
+/* Стили для списка отчетов в модальном окне */
+.report-checkbox-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 0.6rem 0.5rem;
+    cursor: pointer;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.report-checkbox-item:last-child {
+    border-bottom: none;
+}
+
+.report-checkbox-item:hover {
+    background: #f3e8ff;
+}
+
+.report-checkbox-item input {
+    margin-top: 0.2rem;
+    flex-shrink: 0;
+}
+
+.report-info {
+    flex: 2;
+}
+
+.report-type {
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: #9333ea;
+    margin-bottom: 0.2rem;
+}
+
+.report-period {
+    font-weight: 500;
+    color: #333;
+    font-size: 0.85rem;
+}
+
+.report-upload-date {
+    font-size: 0.7rem;
+    color: #999;
+    margin-top: 0.2rem;
+}
+
+.report-revenue {
+    flex-shrink: 0;
+    color: #16a34a;
+    font-weight: 500;
+    font-size: 0.85rem;
+    text-align: right;
+}
+
+/* Стили для модального окна сравнения */
+.compare-modal {
+    max-width: 800px;
+    width: 90%;
+}
+
+.compare-container {
+    display: flex;
+    gap: 2rem;
+}
+
+.compare-left, .compare-right {
+    flex: 1;
+}
+
+.compare-left h4, .compare-right h4 {
+    margin: 0 0 1rem 0;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid #9333ea;
+    font-size: 1rem;
+}
+
+/* Стили для блока результатов сравнения */
+.compare-result {
+    background: white;
+    border-radius: 16px;
+    margin-top: 2rem;
+    border: 1px solid #e5e7eb;
+    overflow: hidden;
+}
+
+.compare-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 1rem 1.5rem;
+}
+
+.compare-header h3 {
+    margin: 0;
+    font-size: 1.1rem;
+}
+
+.close-compare {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 1.5rem;
+    cursor: pointer;
+}
+
+.compare-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    padding: 1.5rem;
+}
+
+.compare-card {
+    background: #f9fafb;
+    border-radius: 12px;
+    padding: 1rem;
+}
+
+.compare-card h4 {
+    margin: 0 0 1rem 0;
+    font-size: 0.9rem;
+    color: #666;
+}
+
+.compare-stats {
+    font-size: 0.8rem;
+}
+
+.compare-stats .stat {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.4rem 0;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.compare-stats .stat:last-child {
+    border-bottom: none;
+}
+
+.stat-label {
+    color: #666;
+}
+
+.stat-value {
+    font-weight: 600;
+}
+
+.stat-value.positive {
+    color: #16a34a;
+}
+
+.stat-value.negative {
+    color: #dc2626;
+}
+
+.difference-card {
+    background: #f0fdf4;
+}
+
+.compare-conclusion {
+    padding: 1rem 1.5rem;
+    background: #f3e8ff;
+    border-top: 1px solid #e9d5ff;
+    font-size: 0.9rem;
+}
+
+/* Стили для выбранных элементов в модальном окне сравнения */
+.report-compare-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.6rem 0.5rem;
+    cursor: pointer;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    border-bottom: 1px solid #f0f0f0;
+    transition: background 0.2s;
+}
+
+.report-compare-item:hover {
+    background: #f3e8ff;
+}
+
+.report-compare-item.selected {
+    background: #e9d5ff;
+    border-left: 3px solid #9333ea;
+}
+
+.report-compare-item .report-info {
+    flex: 2;
+}
+
+.report-compare-item .report-type {
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: #9333ea;
+    margin-bottom: 0.2rem;
+}
+
+.report-compare-item .report-period {
+    font-weight: 500;
+    color: #333;
+    font-size: 0.85rem;
+}
+
+.report-compare-item .report-upload-date {
+    font-size: 0.7rem;
+    color: #999;
+    margin-top: 0.2rem;
+}
+
+.report-compare-item .report-revenue {
+    flex-shrink: 0;
+    color: #16a34a;
+    font-weight: 500;
+    font-size: 0.85rem;
+    text-align: right;
+}

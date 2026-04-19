@@ -1399,6 +1399,41 @@ def get_report(report_id):
         cur.close()
         conn.close()
 
+@app.route("/delete_report/<int:report_id>", methods=["DELETE"])
+def delete_report(report_id):
+    if 'user_id' not in session:
+        return {"success": False, "error": "Not logged in"}, 401
+    
+    conn = get_db_connection()
+    cur = conn.cursor()
+    
+    try:
+        # Проверяем, что отчет принадлежит пользователю
+        cur.execute("""
+            SELECT id FROM user_reports 
+            WHERE id = %s AND user_id = %s
+        """, (report_id, session['user_id']))
+        report = cur.fetchone()
+        
+        if not report:
+            return {"success": False, "error": "Report not found"}, 404
+        
+        # Удаляем отчет (артикулы удалятся автоматически из-за ON DELETE CASCADE)
+        cur.execute("DELETE FROM user_reports WHERE id = %s", (report_id,))
+        conn.commit()
+        
+        print(f"Отчет {report_id} удален пользователем {session['user_id']}")
+        
+        return {"success": True, "message": "Отчет удален"}
+        
+    except Exception as e:
+        conn.rollback()
+        print(f"Ошибка при удалении отчета: {e}")
+        return {"success": False, "error": str(e)}, 500
+    finally:
+        cur.close()
+        conn.close()
+        
 @app.route("/logout")
 def logout():
     session.clear()

@@ -447,9 +447,9 @@
     const totalStorage = parseFloat(dataContainer.dataset.storage) || 0;
     
     // Получаем значение итого к оплате из DOM
-    const totalRowElement = document.querySelector('.total-row strong');
-    const originalItogoKOplate = totalRowElement ? 
-        parseFloat(totalRowElement.textContent.replace(/[^\d,.-]/g, '').replace(',', '.')) || 0 : 0;
+    //const totalRowElement = document.querySelector('.total-row strong');
+    //const originalItogoKOplate = totalRowElement ? 
+        //parseFloat(totalRowElement.textContent.replace(/[^\d,.-]/g, '').replace(',', '.')) || 0 : 0;
     
     let charts = {};
 
@@ -496,7 +496,12 @@
       const otherDeductions = parseFloat(document.getElementById('otherDeductions').value) || 0;
       const taxRate = parseFloat(document.getElementById('taxRate').value) || 0;
       
-      const totalAfterDeductions = originalItogoKOplate - otherDeductions;
+      // Берем актуальное значение Итого к оплате из DOM при каждом расчете!
+      const totalRowElement = document.querySelector('.total-row strong');
+      const currentItogoKOplate = totalRowElement ? 
+          parseFloat(totalRowElement.textContent.replace(/[^\d,.-]/g, '').replace(',', '.')) || 0 : 0;
+      
+      const totalAfterDeductions = currentItogoKOplate - otherDeductions;
       const taxAmount = totalAfterDeductions * (taxRate / 100);
       
       const taxAmountElement = document.getElementById('taxAmount');
@@ -512,7 +517,6 @@
         netProfitElement.style.color = netProfit >= 0 ? '#16a34a' : '#dc2626';
       }
       
-      const totalRowElement = document.querySelector('.total-row strong');
       if (totalRowElement) {
         totalRowElement.textContent = totalAfterDeductions.toLocaleString('ru-RU', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' ₽';
         totalRowElement.style.color = totalAfterDeductions >= 0 ? '' : '#dc2626';

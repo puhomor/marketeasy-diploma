@@ -68,6 +68,7 @@
             <div class="filter-buttons">
                 <button id="filterAllBtn" class="filter-btn active">Все время</button>
                 <button id="filterSelectBtn" class="filter-btn">Выбрать период</button>
+                <button id="filterCompareBtn" class="filter-btn">Сравнить с периодом</button>
             </div>
             
             <!-- Краткая сводка по выбранным отчетам -->
@@ -113,6 +114,29 @@
                 </div>
             </div>
         </div>
+
+        <!-- Блок результатов сравнения -->
+        <div id="compareResult" class="compare-result" style="display: none;">
+            <div class="compare-header">
+                <h3>Сравнение периодов</h3>
+                <button id="closeCompareResult" class="close-compare">&times;</button>
+            </div>
+            <div class="compare-grid">
+                <div class="compare-card period1-card">
+                    <h4>Период 1</h4>
+                    <div class="compare-stats" id="period1Stats"></div>
+                </div>
+                <div class="compare-card period2-card">
+                    <h4>Период 2</h4>
+                    <div class="compare-stats" id="period2Stats"></div>
+                </div>
+                <div class="compare-card difference-card">
+                    <h4>Разница (П2 - П1)</h4>
+                    <div class="compare-stats" id="differenceStats"></div>
+                </div>
+            </div>
+            <div class="compare-conclusion" id="compareConclusion"></div>
+        </div>
         
         <!-- Модальное окно выбора периода -->
         <div id="periodModal" class="modal" style="display: none;">
@@ -140,6 +164,32 @@
             </div>
         </div>
         
+        <!-- Модальное окно сравнения периодов -->
+        <div id="compareModal" class="modal" style="display: none;">
+            <div class="modal-content compare-modal">
+                <div class="modal-header">
+                    <h3>Сравнение периодов</h3>
+                    <button class="modal-close compare-close">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="compare-container">
+                        <div class="compare-left">
+                            <h4>Период 1</h4>
+                            <div class="reports-list" id="compareLeftList"></div>
+                        </div>
+                        <div class="compare-right">
+                            <h4>Период 2</h4>
+                            <div class="reports-list" id="compareRightList"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button id="applyCompareBtn" class="btn-apply">Сравнить</button>
+                    <button id="cancelCompareBtn" class="btn-cancel">Отмена</button>
+                </div>
+            </div>
+        </div>
+
         <div class="pl-container">
             <div class="pl-grid" id="plGrid">
                 {% for report in reports %}
@@ -337,6 +387,10 @@
         let currentFilter = 'all';
         let selectedReportIds = [];
         
+        // Переменные для сравнения
+        let selectedPeriod1 = [];
+        let selectedPeriod2 = [];
+        
         function formatMoney(amount) {
             return amount.toLocaleString('ru-RU', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' ₽';
         }
@@ -367,7 +421,6 @@
                 const formattedDate = createdDate.toLocaleDateString('ru-RU');
                 const formattedTime = createdDate.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
                 
-                // Определяем текст типа отчета
                 let reportTypeText = 'Основной';
                 if (report.report_type === 'buyout') {
                     reportTypeText = 'По выкупам';
@@ -435,7 +488,6 @@
                 grid.appendChild(card);
             });
             
-            // Привязываем обработчики к новым кнопкам удаления
             attachDeleteEventListeners();
         }
         
@@ -504,31 +556,336 @@
             .catch(error => console.error('Ошибка загрузки отчетов:', error));
         }
         
+        // ========== ФУНКЦИИ ДЛЯ СРАВНЕНИЯ ПЕРИОДОВ ==========
+        
+        function renderCompareLists() {
+            const leftList = document.getElementById('compareLeftList');
+            const rightList = document.getElementById('compareRightList');
+            
+            if (!leftList || !rightList) return;
+            
+            const monthNames = ['январь', 'февраль', 'март', 'апрель', 'май', 'июнь', 'июль', 'август', 'сентябрь', 'октябрь', 'ноябрь', 'декабрь'];
+            const grouped = {};
+            
+            allReports.forEach(report => {
+                // Используем start_date из периода отчета
+                let reportDate = null;
+                if (report.start_date) {
+                    reportDate = new Date(report.start_date);
+                } else {
+                    const periodMatch = report.report_period.match(/(\d{2})\.(\d{2})\.(\d{4})/);
+                    if (periodMatch) {
+                        reportDate = new Date(periodMatch[3], periodMatch[2] - 1, periodMatch[1]);
+                    }
+                }
+                
+                if (reportDate && !isNaN(reportDate.getTime())) {
+                    const monthYear = `${monthNames[reportDate.getMonth()]} ${reportDate.getFullYear()}`;
+                    if (!grouped[monthYear]) grouped[monthYear] = [];
+                    grouped[monthYear].push(report);
+                }
+            });
+            
+            // Сортируем месяцы в обратном порядке
+            const sortedMonths = Object.keys(grouped).sort((a, b) => {
+                const monthA = monthNames.findIndex(m => a.startsWith(m));
+                const yearA = parseInt(a.split(' ')[1]);
+                const monthB = monthNames.findIndex(m => b.startsWith(m));
+                const yearB = parseInt(b.split(' ')[1]);
+                if (yearA !== yearB) return yearB - yearA;
+                return monthB - monthA;
+            });
+            
+            let leftHtml = '';
+            let rightHtml = '';
+            
+            for (const month of sortedMonths) {
+                const reports = grouped[month];
+                // Сортируем отчеты внутри месяца по дате начала периода
+                reports.sort((a, b) => {
+                    let dateA = a.start_date ? new Date(a.start_date) : new Date(0);
+                    let dateB = b.start_date ? new Date(b.start_date) : new Date(0);
+                    return dateB - dateA;
+                });
+                
+                leftHtml += `<div class="report-group"><div class="group-header">${escapeHtml(month)}</div>`;
+                rightHtml += `<div class="report-group"><div class="group-header">${escapeHtml(month)}</div>`;
+                
+                reports.forEach(report => {
+                    let reportTypeText = 'Основной';
+                    if (report.report_type === 'buyout') {
+                        reportTypeText = 'По выкупам';
+                    } else if (report.report_type === 'merged') {
+                        reportTypeText = 'Основной + По выкупам';
+                    }
+                    
+                    const isLeftSelected = selectedPeriods1.some(r => r.id === report.id);
+                    const isRightSelected = selectedPeriods2.some(r => r.id === report.id);
+                    
+                    leftHtml += `
+                        <div class="report-compare-item ${isLeftSelected ? 'selected' : ''}" data-report-id="${report.id}">
+                            <div class="report-info">
+                                <div class="report-type">${reportTypeText}</div>
+                                <div class="report-period">${escapeHtml(report.report_period)}</div>
+                                <div class="report-upload-date">Загружен: ${new Date(report.created_at).toLocaleDateString('ru-RU')}</div>
+                            </div>
+                            <div class="report-revenue">${formatMoney(report.revenue)}</div>
+                        </div>
+                    `;
+                    
+                    rightHtml += `
+                        <div class="report-compare-item ${isRightSelected ? 'selected' : ''}" data-report-id="${report.id}">
+                            <div class="report-info">
+                                <div class="report-type">${reportTypeText}</div>
+                                <div class="report-period">${escapeHtml(report.report_period)}</div>
+                                <div class="report-upload-date">Загружен: ${new Date(report.created_at).toLocaleDateString('ru-RU')}</div>
+                            </div>
+                            <div class="report-revenue">${formatMoney(report.revenue)}</div>
+                        </div>
+                    `;
+                });
+                
+                leftHtml += `</div>`;
+                rightHtml += `</div>`;
+            }
+            
+            leftList.innerHTML = leftHtml;
+            rightList.innerHTML = rightHtml;
+            
+            // Обработчики для левой колонки
+            document.querySelectorAll('#compareLeftList .report-compare-item').forEach(item => {
+                item.addEventListener('click', (e) => {
+                    if (e.target.closest('.delete-report-btn')) return;
+                    const reportId = parseInt(item.dataset.reportId);
+                    const report = allReports.find(r => r.id === reportId);
+                    const index = selectedPeriods1.findIndex(r => r.id === reportId);
+                    if (index === -1) {
+                        selectedPeriods1.push(report);
+                    } else {
+                        selectedPeriods1.splice(index, 1);
+                    }
+                    renderCompareLists();
+                });
+            });
+            
+            // Обработчики для правой колонки
+            document.querySelectorAll('#compareRightList .report-compare-item').forEach(item => {
+                item.addEventListener('click', (e) => {
+                    if (e.target.closest('.delete-report-btn')) return;
+                    const reportId = parseInt(item.dataset.reportId);
+                    const report = allReports.find(r => r.id === reportId);
+                    const index = selectedPeriods2.findIndex(r => r.id === reportId);
+                    if (index === -1) {
+                        selectedPeriods2.push(report);
+                    } else {
+                        selectedPeriods2.splice(index, 1);
+                    }
+                    renderCompareLists();
+                });
+            });
+        }
+        
+        function showCompareResult() {
+            if (selectedPeriods1.length === 0 || selectedPeriods2.length === 0) {
+                alert('Пожалуйста, выберите хотя бы один отчет в каждой колонке');
+                return;
+            }
+            
+            const compareResult = document.getElementById('compareResult');
+            const period1Stats = document.getElementById('period1Stats');
+            const period2Stats = document.getElementById('period2Stats');
+            const differenceStats = document.getElementById('differenceStats');
+            const compareConclusion = document.getElementById('compareConclusion');
+            
+            // Агрегируем данные по выбранным отчетам в левой колонке
+            const period1Aggregated = {
+                count: selectedPeriods1.length,
+                report_period: selectedPeriods1.map(r => r.report_period).join(', '),
+                revenue: selectedPeriods1.reduce((sum, r) => sum + r.revenue, 0),
+                logistics: selectedPeriods1.reduce((sum, r) => sum + r.logistics, 0),
+                storage: selectedPeriods1.reduce((sum, r) => sum + r.storage, 0),
+                tax_amount: selectedPeriods1.reduce((sum, r) => sum + r.tax_amount, 0),
+                net_profit: selectedPeriods1.reduce((sum, r) => sum + r.net_profit, 0)
+            };
+            
+            // Агрегируем данные по выбранным отчетам в правой колонке
+            const period2Aggregated = {
+                count: selectedPeriods2.length,
+                report_period: selectedPeriods2.map(r => r.report_period).join(', '),
+                revenue: selectedPeriods2.reduce((sum, r) => sum + r.revenue, 0),
+                logistics: selectedPeriods2.reduce((sum, r) => sum + r.logistics, 0),
+                storage: selectedPeriods2.reduce((sum, r) => sum + r.storage, 0),
+                tax_amount: selectedPeriods2.reduce((sum, r) => sum + r.tax_amount, 0),
+                net_profit: selectedPeriods2.reduce((sum, r) => sum + r.net_profit, 0)
+            };
+            
+            period1Stats.innerHTML = `
+                <div class="stat">
+                    <span class="stat-label">Отчетов:</span>
+                    <span class="stat-value">${period1Aggregated.count}</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Периоды:</span>
+                    <span class="stat-value" style="font-size:0.7rem;">${escapeHtml(period1Aggregated.report_period)}</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Продажа:</span>
+                    <span class="stat-value">${formatMoney(period1Aggregated.revenue)}</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Логистика:</span>
+                    <span class="stat-value negative">${formatMoney(period1Aggregated.logistics)}</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Хранение:</span>
+                    <span class="stat-value negative">${formatMoney(period1Aggregated.storage)}</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Налог:</span>
+                    <span class="stat-value negative">${formatMoney(period1Aggregated.tax_amount)}</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Чистая прибыль:</span>
+                    <span class="stat-value ${period1Aggregated.net_profit >= 0 ? 'positive' : 'negative'}">
+                        ${formatMoney(period1Aggregated.net_profit)}
+                    </span>
+                </div>
+            `;
+            
+            period2Stats.innerHTML = `
+                <div class="stat">
+                    <span class="stat-label">Отчетов:</span>
+                    <span class="stat-value">${period2Aggregated.count}</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Периоды:</span>
+                    <span class="stat-value" style="font-size:0.7rem;">${escapeHtml(period2Aggregated.report_period)}</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Продажа:</span>
+                    <span class="stat-value">${formatMoney(period2Aggregated.revenue)}</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Логистика:</span>
+                    <span class="stat-value negative">${formatMoney(period2Aggregated.logistics)}</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Хранение:</span>
+                    <span class="stat-value negative">${formatMoney(period2Aggregated.storage)}</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Налог:</span>
+                    <span class="stat-value negative">${formatMoney(period2Aggregated.tax_amount)}</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Чистая прибыль:</span>
+                    <span class="stat-value ${period2Aggregated.net_profit >= 0 ? 'positive' : 'negative'}">
+                        ${formatMoney(period2Aggregated.net_profit)}
+                    </span>
+                </div>
+            `;
+            
+            const diffRevenue = period2Aggregated.revenue - period1Aggregated.revenue;
+            const diffLogistics = period2Aggregated.logistics - period1Aggregated.logistics;
+            const diffStorage = period2Aggregated.storage - period1Aggregated.storage;
+            const diffTax = period2Aggregated.tax_amount - period1Aggregated.tax_amount;
+            const diffProfit = period2Aggregated.net_profit - period1Aggregated.net_profit;
+            
+            differenceStats.innerHTML = `
+                <div class="stat">
+                    <span class="stat-label">Продажа:</span>
+                    <span class="stat-value ${diffRevenue >= 0 ? 'positive' : 'negative'}">
+                        ${diffRevenue >= 0 ? '+' : ''}${formatMoney(diffRevenue)}
+                    </span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Логистика:</span>
+                    <span class="stat-value ${diffLogistics <= 0 ? 'positive' : 'negative'}">
+                        ${diffLogistics >= 0 ? '+' : ''}${formatMoney(diffLogistics)}
+                    </span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Хранение:</span>
+                    <span class="stat-value ${diffStorage <= 0 ? 'positive' : 'negative'}">
+                        ${diffStorage >= 0 ? '+' : ''}${formatMoney(diffStorage)}
+                    </span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Налог:</span>
+                    <span class="stat-value ${diffTax <= 0 ? 'positive' : 'negative'}">
+                        ${diffTax >= 0 ? '+' : ''}${formatMoney(diffTax)}
+                    </span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Чистая прибыль:</span>
+                    <span class="stat-value ${diffProfit >= 0 ? 'positive' : 'negative'}">
+                        ${diffProfit >= 0 ? '+' : ''}${formatMoney(diffProfit)}
+                    </span>
+                </div>
+            `;
+            
+            let conclusionText = '';
+            if (diffProfit > 0) {
+                conclusionText = `Группа "Период 2" показала лучший результат на ${formatMoney(diffProfit)} по чистой прибыли. `;
+                if (diffRevenue > 0) conclusionText += `Выручка выросла на ${formatMoney(diffRevenue)}. `;
+                if (diffLogistics < 0) conclusionText += `Логистика снизилась на ${formatMoney(Math.abs(diffLogistics))}. `;
+            } else if (diffProfit < 0) {
+                conclusionText = `Группа "Период 1" показала лучший результат на ${formatMoney(Math.abs(diffProfit))} по чистой прибыли. `;
+            } else {
+                conclusionText = `Прибыль в обеих группах одинакова. `;
+            }
+            
+            compareConclusion.innerHTML = conclusionText;
+            compareResult.style.display = 'block';
+        }
+        
         function setupFilters() {
             const filterAllBtn = document.getElementById('filterAllBtn');
             const filterSelectBtn = document.getElementById('filterSelectBtn');
+            const filterCompareBtn = document.getElementById('filterCompareBtn');
             const periodModal = document.getElementById('periodModal');
+            const compareModal = document.getElementById('compareModal');
             const modalClose = document.querySelector('.modal-close');
+            const compareClose = document.querySelector('.compare-close');
             const applyFilterBtn = document.getElementById('applyFilterBtn');
             const cancelFilterBtn = document.getElementById('cancelFilterBtn');
+            const applyCompareBtn = document.getElementById('applyCompareBtn');
+            const cancelCompareBtn = document.getElementById('cancelCompareBtn');
             const quick2WeeksBtn = document.getElementById('quick2WeeksBtn');
             const quickMonthBtn = document.getElementById('quickMonthBtn');
             const quick3MonthsBtn = document.getElementById('quick3MonthsBtn');
             const quickQuarterBtn = document.getElementById('quickQuarterBtn');
             const quickYearBtn = document.getElementById('quickYearBtn');
+            const closeCompareResult = document.getElementById('closeCompareResult');
             
             filterAllBtn.addEventListener('click', () => {
                 filterAllBtn.classList.add('active');
                 filterSelectBtn.classList.remove('active');
+                if (filterCompareBtn) filterCompareBtn.classList.remove('active');
                 currentFilter = 'all';
                 updateSummary(allReports);
+                const compareResult = document.getElementById('compareResult');
+                if (compareResult) compareResult.style.display = 'none';
             });
             
             filterSelectBtn.addEventListener('click', () => {
                 filterSelectBtn.classList.add('active');
                 filterAllBtn.classList.remove('active');
+                if (filterCompareBtn) filterCompareBtn.classList.remove('active');
                 openPeriodModal();
             });
+            
+            if (filterCompareBtn) {
+                filterCompareBtn.addEventListener('click', () => {
+                    filterCompareBtn.classList.add('active');
+                    filterAllBtn.classList.remove('active');
+                    filterSelectBtn.classList.remove('active');
+                    selectedPeriods1 = [];
+                    selectedPeriods2 = [];
+                    renderCompareLists();
+                    if (compareModal) compareModal.style.display = 'flex';
+                });
+            }
             
             function openPeriodModal() {
                 renderReportsList();
@@ -544,25 +901,70 @@
                 if (!reportsList) return;
                 
                 const monthNames = ['январь', 'февраль', 'март', 'апрель', 'май', 'июнь', 'июль', 'август', 'сентябрь', 'октябрь', 'ноябрь', 'декабрь'];
-                
                 const grouped = {};
+                
                 allReports.forEach(report => {
-                    const date = new Date(report.created_at);
-                    const monthYear = `${monthNames[date.getMonth()]} ${date.getFullYear()}`;
-                    if (!grouped[monthYear]) grouped[monthYear] = [];
-                    grouped[monthYear].push(report);
+                    // Используем start_date из периода отчета, а не дату загрузки
+                    let reportDate = null;
+                    if (report.start_date) {
+                        reportDate = new Date(report.start_date);
+                    } else {
+                        // Если start_date нет, парсим из строки report_period
+                        const periodMatch = report.report_period.match(/(\d{2})\.(\d{2})\.(\d{4})/);
+                        if (periodMatch) {
+                            reportDate = new Date(periodMatch[3], periodMatch[2] - 1, periodMatch[1]);
+                        }
+                    }
+                    
+                    if (reportDate && !isNaN(reportDate.getTime())) {
+                        const monthYear = `${monthNames[reportDate.getMonth()]} ${reportDate.getFullYear()}`;
+                        if (!grouped[monthYear]) grouped[monthYear] = [];
+                        grouped[monthYear].push(report);
+                    }
+                });
+                
+                // Сортируем месяцы в обратном порядке (сначала новые)
+                const sortedMonths = Object.keys(grouped).sort((a, b) => {
+                    const monthA = monthNames.findIndex(m => a.startsWith(m));
+                    const yearA = parseInt(a.split(' ')[1]);
+                    const monthB = monthNames.findIndex(m => b.startsWith(m));
+                    const yearB = parseInt(b.split(' ')[1]);
+                    if (yearA !== yearB) return yearB - yearA;
+                    return monthB - monthA;
                 });
                 
                 let html = '';
-                for (const [month, reports] of Object.entries(grouped)) {
+                for (const month of sortedMonths) {
+                    const reports = grouped[month];
+                    // Сортируем отчеты внутри месяца по дате начала периода (новые сверху)
+                    reports.sort((a, b) => {
+                        let dateA = a.start_date ? new Date(a.start_date) : new Date(0);
+                        let dateB = b.start_date ? new Date(b.start_date) : new Date(0);
+                        return dateB - dateA;
+                    });
+                    
                     html += `<div class="report-group"><div class="group-header">${escapeHtml(month)}</div>`;
                     reports.forEach(report => {
                         const isChecked = selectedReportIds.includes(report.id);
+                        const uploadDate = new Date(report.created_at);
+                        const formattedUploadDate = uploadDate.toLocaleDateString('ru-RU');
+                        
+                        let reportTypeText = 'Основной';
+                        if (report.report_type === 'buyout') {
+                            reportTypeText = 'По выкупам';
+                        } else if (report.report_type === 'merged') {
+                            reportTypeText = 'Основной + По выкупам';
+                        }
+                        
                         html += `
                             <label class="report-checkbox-item">
                                 <input type="checkbox" class="report-checkbox" value="${report.id}" ${isChecked ? 'checked' : ''}>
-                                <span>${escapeHtml(report.report_period)}</span>
-                                <small>(${formatMoney(report.revenue)})</small>
+                                <div class="report-info">
+                                    <div class="report-type">${reportTypeText}</div>
+                                    <div class="report-period">${escapeHtml(report.report_period)}</div>
+                                    <div class="report-upload-date">Загружен: ${formattedUploadDate}</div>
+                                </div>
+                                <div class="report-revenue">${formatMoney(report.revenue)}</div>
                             </label>
                         `;
                     });
@@ -571,17 +973,49 @@
                 reportsList.innerHTML = html;
             }
             
-            applyFilterBtn.addEventListener('click', () => {
-                const checkboxes = document.querySelectorAll('.report-checkbox:checked');
-                selectedReportIds = Array.from(checkboxes).map(cb => parseInt(cb.value));
-                currentFilter = 'selected';
-                const filteredReports = allReports.filter(r => selectedReportIds.includes(r.id));
-                updateSummary(filteredReports);
-                closeModal();
-            });
+            if (applyFilterBtn) {
+                applyFilterBtn.addEventListener('click', () => {
+                    const checkboxes = document.querySelectorAll('.report-checkbox:checked');
+                    selectedReportIds = Array.from(checkboxes).map(cb => parseInt(cb.value));
+                    currentFilter = 'selected';
+                    const filteredReports = allReports.filter(r => selectedReportIds.includes(r.id));
+                    updateSummary(filteredReports);
+                    closeModal();
+                });
+            }
             
-            cancelFilterBtn.addEventListener('click', closeModal);
+            if (cancelFilterBtn) cancelFilterBtn.addEventListener('click', closeModal);
             if (modalClose) modalClose.addEventListener('click', closeModal);
+            
+            if (applyCompareBtn) {
+                applyCompareBtn.addEventListener('click', () => {
+                    if (selectedPeriods1.length === 0 || selectedPeriods2.length === 0) {
+                        alert('Пожалуйста, выберите хотя бы один отчет в каждой колонке');
+                        return;
+                    }
+                    if (compareModal) compareModal.style.display = 'none';
+                    showCompareResult();
+                });
+            }
+            
+            if (cancelCompareBtn) {
+                cancelCompareBtn.addEventListener('click', () => {
+                    if (compareModal) compareModal.style.display = 'none';
+                });
+            }
+            
+            if (compareClose) {
+                compareClose.addEventListener('click', () => {
+                    if (compareModal) compareModal.style.display = 'none';
+                });
+            }
+            
+            if (closeCompareResult) {
+                closeCompareResult.addEventListener('click', () => {
+                    const compareResult = document.getElementById('compareResult');
+                    if (compareResult) compareResult.style.display = 'none';
+                });
+            }
             
             if (quick2WeeksBtn) quick2WeeksBtn.addEventListener('click', () => selectLast2Weeks());
             if (quickMonthBtn) quickMonthBtn.addEventListener('click', () => selectCurrentMonth());
@@ -637,7 +1071,7 @@
         document.addEventListener('DOMContentLoaded', function() {
             loadAllReports();
             setupFilters();
-            attachDeleteEventListeners(); // для статических карточек
+            attachDeleteEventListeners();
         });
     </script>
     {% endif %}

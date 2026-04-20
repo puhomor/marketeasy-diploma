@@ -496,20 +496,29 @@
       const otherDeductions = parseFloat(document.getElementById('otherDeductions').value) || 0;
       const taxRate = parseFloat(document.getElementById('taxRate').value) || 0;
       
-      // Берем актуальное значение Итого к оплате из DOM при каждом расчете!
+      // Находим строку "Итого к оплате" в DOM
       const totalRowElement = document.querySelector('.total-row strong');
-      const currentItogoKOplate = totalRowElement ? 
-          parseFloat(totalRowElement.textContent.replace(/[^\d,.-]/g, '').replace(',', '.')) || 0 : 0;
       
-      const totalAfterDeductions = currentItogoKOplate - otherDeductions;
-      const taxAmount = totalAfterDeductions * (taxRate / 100);
+      // ВАЖНО: нужно хранить ОРИГИНАЛЬНОЕ значение Итого к оплате где-то отдельно
+      // Сохраняем оригинальное значение при первом расчете
+      if (!window.originalItogoKOplate) {
+        window.originalItogoKOplate = totalRowElement ? 
+            parseFloat(totalRowElement.textContent.replace(/[^\d,.-]/g, '').replace(',', '.')) || 0 : 0;
+      }
+      
+      // Используем сохраненное оригинальное значение, а не текущее из DOM!
+      const originalItogoKOplate = window.originalItogoKOplate;
+      
+      // Налог считается от ИТОГОВОЙ суммы
+      const taxAmount = originalItogoKOplate * (taxRate / 100);
       
       const taxAmountElement = document.getElementById('taxAmount');
       if (taxAmountElement) {
         taxAmountElement.textContent = taxAmount.toLocaleString('ru-RU', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' ₽';
       }
       
-      const netProfit = totalAfterDeductions - taxAmount - totalCogs;
+      // Чистая прибыль = Итоговая сумма - Налог - Себестоимость - Прочие удержания
+      const netProfit = originalItogoKOplate - taxAmount - totalCogs - otherDeductions;
       
       const netProfitElement = document.getElementById('netProfit');
       if (netProfitElement) {
@@ -517,9 +526,11 @@
         netProfitElement.style.color = netProfit >= 0 ? '#16a34a' : '#dc2626';
       }
       
-      if (totalRowElement) {
-        totalRowElement.textContent = totalAfterDeductions.toLocaleString('ru-RU', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' ₽';
-        totalRowElement.style.color = totalAfterDeductions >= 0 ? '' : '#dc2626';
+      // НЕ ИЗМЕНЯЕМ строку "Итого к оплате" в DOM!
+      // Она должна оставаться неизменной, как в отчете WB
+      if (totalRowElement && totalRowElement.textContent !== originalItogoKOplate.toLocaleString('ru-RU', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' ₽') {
+        totalRowElement.textContent = originalItogoKOplate.toLocaleString('ru-RU', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' ₽';
+        totalRowElement.style.color = originalItogoKOplate >= 0 ? '' : '#dc2626';
       }
     }
 
@@ -919,67 +930,77 @@
 
 <!--9 загрузка сохраненных данных-->
 <script>
-  // Функция для загрузки данных из БД по report_id из сессии
-  function loadSavedReport() {
-      // Проверяем, есть ли report_id в data-container
-      const dataContainerElem = document.getElementById('data-container');
-      const reportId = dataContainerElem ? parseInt(dataContainerElem.dataset.reportId) : null;
-      
-      if (reportId && !dataContainerElem.dataset.loaded) {
-          // Отмечаем, что уже загружали
-          dataContainerElem.dataset.loaded = 'true';
-          
-          fetch(`/get_report/${reportId}`)
-              .then(response => response.json())
-              .then(data => {
-                  if (data.success) {
-                      // Заполняем поля налога и прочих удержаний
-                      const taxRateInput = document.getElementById('taxRate');
-                      const otherDeductionsInput = document.getElementById('otherDeductions');
-                      
-                      if (taxRateInput && data.report.tax_amount > 0) {
-                          // Вычисляем процент налога из tax_amount и itogo_k_oplate
-                          const taxRate = data.report.itogo_k_oplate > 0 
-                              ? (data.report.tax_amount / data.report.itogo_k_oplate * 100) 
-                              : 0;
-                          taxRateInput.value = taxRate.toFixed(2);
-                      }
-                      
-                      if (otherDeductionsInput && data.report.other_deductions) {
-                          otherDeductionsInput.value = data.report.other_deductions;
-                      }
-                      
-                      // Заполняем поля себестоимости для артикулов
-                      data.articles.forEach(article => {
-                          const costInput = document.querySelector(`.cogs-input[data-article="${article.article}"]`);
-                          if (costInput && article.cost) {
-                              costInput.value = article.cost;
-                              // Обновляем отображение общей себестоимости
-                              const quantity = parseInt(costInput.closest('tr').querySelector('td:nth-child(4)').textContent.trim()) || 1;
-                              const cogsTotal = article.cost * quantity;
-                              const cogsCell = document.getElementById(`cogs-total-${article.article}`);
-                              if (cogsCell) {
-                                  cogsCell.textContent = cogsTotal.toLocaleString('ru-RU') + ' ₽';
-                              }
-                          }
-                      });
-                      
-                      // Пересчитываем итоги
-                      if (typeof calculateTotals === 'function') {
-                          calculateTotals();
-                      }
-                      loadSavedCostsForArticles();
-                      showNotification('Загружен последний отчет', 'success');
-                  }
-              })
-              .catch(error => console.error('Ошибка загрузки отчета:', error));
-      }
-  }
-  
-  // Вызываем загрузку после загрузки DOM
-  document.addEventListener('DOMContentLoaded', function() {
-      setTimeout(loadSavedReport, 500);
-  });
+    // Функция для загрузки данных из БД по report_id из сессии
+    function loadSavedReport() {
+        // Проверяем, есть ли report_id в data-container
+        const dataContainerElem = document.getElementById('data-container');
+        const reportId = dataContainerElem ? parseInt(dataContainerElem.dataset.reportId) : null;
+        
+        if (reportId && !dataContainerElem.dataset.loaded) {
+            // Отмечаем, что уже загружали
+            dataContainerElem.dataset.loaded = 'true';
+            
+            // СБРАСЫВАЕМ сохраненное оригинальное значение Итого к оплате при загрузке нового отчета
+            window.originalItogoKOplate = null;
+            
+            fetch(`/get_report/${reportId}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Заполняем поля налога и прочих удержаний
+                        const taxRateInput = document.getElementById('taxRate');
+                        const otherDeductionsInput = document.getElementById('otherDeductions');
+                        
+                        if (taxRateInput && data.report.tax_amount > 0) {
+                            // Вычисляем процент налога из tax_amount и itogo_k_oplate
+                            const taxRate = data.report.itogo_k_oplate > 0 
+                                ? (data.report.tax_amount / data.report.itogo_k_oplate * 100) 
+                                : 0;
+                            taxRateInput.value = taxRate.toFixed(2);
+                        }
+                        
+                        if (otherDeductionsInput && data.report.other_deductions) {
+                            otherDeductionsInput.value = data.report.other_deductions;
+                        }
+                        
+                        // Заполняем поля себестоимости для артикулов
+                        data.articles.forEach(article => {
+                            const costInput = document.querySelector(`.cogs-input[data-article="${article.article}"]`);
+                            if (costInput && article.cost) {
+                                costInput.value = article.cost;
+                                // Обновляем отображение общей себестоимости
+                                const quantity = parseInt(costInput.closest('tr').querySelector('td:nth-child(4)').textContent.trim()) || 1;
+                                const cogsTotal = article.cost * quantity;
+                                const cogsCell = document.getElementById(`cogs-total-${article.article}`);
+                                if (cogsCell) {
+                                    cogsCell.textContent = cogsTotal.toLocaleString('ru-RU') + ' ₽';
+                                }
+                            }
+                        });
+                        
+                        // Обновляем строку "Итого к оплате" с оригинальным значением из БД
+                        const totalRowElement = document.querySelector('.total-row strong');
+                        if (totalRowElement && data.report.itogo_k_oplate) {
+                            totalRowElement.textContent = data.report.itogo_k_oplate.toLocaleString('ru-RU', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' ₽';
+                            totalRowElement.style.color = data.report.itogo_k_oplate >= 0 ? '' : '#dc2626';
+                        }
+                        
+                        // Пересчитываем итоги
+                        if (typeof calculateTotals === 'function') {
+                            calculateTotals();
+                        }
+                        loadSavedCostsForArticles();
+                        showNotification('Загружен последний отчет', 'success');
+                    }
+                })
+                .catch(error => console.error('Ошибка загрузки отчета:', error));
+        }
+    }
+    
+    // Вызываем загрузку после загрузки DOM
+    document.addEventListener('DOMContentLoaded', function() {
+        setTimeout(loadSavedReport, 500);
+    });
 </script>
 
 <!--10 загрузка сохраненных себестоимостей для новых отчетов-->

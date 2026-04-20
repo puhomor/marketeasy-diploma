@@ -582,6 +582,7 @@ def analyze_wb():
     else:
         flash("Можно загрузить не более 2 файлов за раз", "error")
         return redirect(url_for("analytics_wb"))
+
 def process_single_report(file):
     """Обработка одного файла с выбором типа отчета"""
     try:
@@ -668,32 +669,36 @@ def detect_report_type(df):
         return 'buyout'
     else:
         return 'main'
+
 def parse_buyout_report(df):
-    """Парсинг отчёта 'По выкупам' — используем столбец P"""
+    """Парсинг отчёта 'По выкупам' (как в старой версии)"""
     
     sales_mask = df['Тип документа'] == 'Продажа'
-    sales_df = df[sales_mask]
     
-    # Считаем k_perenum из столбца
-    k_perenum_column = 'К перечислению Продавцу за реализованный Товар'
-    k_perenum = 0
-    if k_perenum_column in df.columns:
-        k_perenum = df.loc[sales_mask, k_perenum_column].sum()
-    
-    # Считаем логистику
+    q_column = 'К перечислению Продавцу за реализованный Товар'
+    p_column = 'Вайлдберриз реализовал Товар (Пр)'
     logistics_column = 'Услуги по доставке товара покупателю'
+    
+    # К перечислению за товар
+    k_perenum = df.loc[sales_mask, q_column].sum() if q_column in df.columns else 0
+    
+    # Логистика
     logistics = df[logistics_column].abs().sum() if logistics_column in df.columns else 0
     
     # Итого к оплате
     itogo_k_oplate = k_perenum - logistics
     
+    # Продажа с учетом возвратов (столбец P)
+    revenue = df.loc[sales_mask, p_column].sum() if p_column in df.columns else 0
+    
+    # Артикулы
     articles_data = []
+    sales_df = df[sales_mask]
     
     if not sales_df.empty:
-        # Используем правильный столбец
         grouped = sales_df.groupby(['Артикул поставщика', 'Название']).agg({
             'Кол-во': 'sum',
-            'Вайлдберриз реализовал Товар (Пр)': 'sum'  # ← ЭТО ГЛАВНОЕ
+            p_column: 'sum'
         }).reset_index()
         
         for _, row in grouped.iterrows():
@@ -701,23 +706,23 @@ def parse_buyout_report(df):
                 'article': str(row['Артикул поставщика']),
                 'name': row['Название'],
                 'quantity': int(row['Кол-во']),
-                'revenue': float(row['Вайлдберриз реализовал Товар (Пр)']),  # ← столбец P
+                'revenue': float(row[p_column]),
                 'cost': 0
             })
     
-    total_revenue = sum(a['revenue'] for a in articles_data)
-    
     return {
         'articles_data': articles_data,
-        'total_revenue': total_revenue,
-        'k_perenum': float(k_perenum),      # ← ДОБАВИТЬ
-        'itogo_k_oplate': float(itogo_k_oplate),  # ← ДОБАВИТЬ
-        'logistics': float(logistics)        # ← ДОБАВИТЬ
+        'total_revenue': sum(a['revenue'] for a in articles_data),
+        'revenue': float(revenue),
+        'k_perenum': float(k_perenum),
+        'logistics': float(logistics),
+        'storage': 0,
+        'itogo_k_oplate': float(itogo_k_oplate)
     }
+
 def merge_reports(main_result, buyout_result):
-    """Объединяет основной отчёт и отчёт по выкупам"""
+    """Объединяет основной отчёт и отчёт по выкупам (как в старой версии)"""
     
-    # 1. Суммируем финансовые показатели
     analysis_result = {
         'revenue': main_result['analysis_result']['revenue'] + buyout_result['total_revenue'],
         'k_perenum': main_result['analysis_result']['k_perenum'] + buyout_result.get('k_perenum', 0),
@@ -729,10 +734,9 @@ def merge_reports(main_result, buyout_result):
         'itogo_k_oplate': main_result['analysis_result']['itogo_k_oplate'] + buyout_result.get('itogo_k_oplate', 0)
     }
     
-    # 2. Объединяем артикулы
+    # Объединение артикулов
     articles_dict = {}
     
-    # Добавляем артикулы из основного отчёта
     for article in main_result['articles_data']:
         art_key = str(article['article'])
         articles_dict[art_key] = {
@@ -743,15 +747,12 @@ def merge_reports(main_result, buyout_result):
             'cost': 0
         }
     
-    # Добавляем/суммируем артикулы из отчёта по выкупам
     for article in buyout_result['articles_data']:
         art_key = str(article['article'])
         if art_key in articles_dict:
-            # Артикул уже есть — суммируем
             articles_dict[art_key]['quantity'] += article['quantity']
             articles_dict[art_key]['revenue'] += article['revenue']
         else:
-            # Новый артикул — добавляем
             articles_dict[art_key] = {
                 'article': art_key,
                 'name': article['name'],
@@ -760,45 +761,40 @@ def merge_reports(main_result, buyout_result):
                 'cost': 0
             }
     
-    # Преобразуем обратно в список
-    merged_articles = list(articles_dict.values())
-    
-    # Период оставляем из основного отчёта
-    period = main_result['period']
-    
     return {
-        'period': period,
+        'period': main_result['period'],
         'analysis_result': analysis_result,
-        'articles_data': merged_articles
+        'articles_data': list(articles_dict.values())
     }
+
 def parse_wb_report(df):
-    """Парсинг стандартного отчёта Wildberries (существующая логика)"""
-    # 1. "Продажа" = Продажи по столбцу «Вайлдберриз реализовал товар» - Возвраты
-    wb_realized_column = 'Вайлдберриз реализовал Товар (Пр)'
+    """Парсинг стандартного отчёта Wildberries (как в старой версии)"""
     
     sales_mask = df['Тип документа'] == 'Продажа'
-    sales_wb_realized = df.loc[sales_mask, wb_realized_column].sum() if wb_realized_column in df.columns else 0
-    
     returns_mask = df['Тип документа'] == 'Возврат'
-    returns_wb_realized = df.loc[returns_mask, wb_realized_column].sum() if wb_realized_column in df.columns else 0
     
-    revenue = sales_wb_realized - returns_wb_realized
+    q_column = 'К перечислению Продавцу за реализованный Товар'
+    p_column = 'Вайлдберриз реализовал Товар (Пр)'
+    logistics_column = 'Услуги по доставке товара покупателю'
+    storage_column = 'Хранение'
+    
+    # 1. Продажа с учетом возвратов (столбец P)
+    sales_p = df.loc[sales_mask, p_column].sum() if p_column in df.columns else 0
+    returns_p = df.loc[returns_mask, p_column].sum() if p_column in df.columns else 0
+    revenue = sales_p - returns_p
 
-    # 2. "К перечислению за товар"
-    k_perenum_column = 'К перечислению Продавцу за реализованный Товар'
-    if k_perenum_column in df.columns:
-        sales_k_perenum = df.loc[sales_mask, k_perenum_column].sum()
-        returns_k_perenum = df.loc[returns_mask, k_perenum_column].sum()
-        k_perenum = sales_k_perenum - returns_k_perenum
+    # 2. К перечислению за товар (столбец Q) - ВЫЧИТАЕМ возвраты
+    if q_column in df.columns:
+        sales_k = df.loc[sales_mask, q_column].sum()
+        returns_k = df.loc[returns_mask, q_column].sum()
+        k_perenum = sales_k - returns_k
     else:
         k_perenum = 0
 
     # 3. Логистика
-    logistics_column = 'Услуги по доставке товара покупателю'
     logistics = df[logistics_column].abs().sum() if logistics_column in df.columns else 0
 
     # 4. Хранение
-    storage_column = 'Хранение'
     storage = df[storage_column].abs().sum() if storage_column in df.columns else 0
 
     # 5. Прочие удержания
@@ -808,19 +804,17 @@ def parse_wb_report(df):
         other_deductions = other_rows['Удержания'].abs().sum()
     
     # 6. Штрафы
-    fines_column = 'Общая сумма штрафов'
-    fines = df[fines_column].abs().sum() if fines_column in df.columns else 0
+    fines = df['Общая сумма штрафов'].abs().sum() if 'Общая сумма штрафов' in df.columns else 0
 
     # 7. Корректировка ВВ
-    correction_column = 'Корректировка Вознаграждения Вайлдберриз (ВВ)'
-    correction = df[correction_column].sum() if correction_column in df.columns else 0
+    correction = df['Корректировка Вознаграждения Вайлдберриз (ВВ)'].sum() if 'Корректировка Вознаграждения Вайлдберриз (ВВ)' in df.columns else 0
 
-    # Итого к оплате
+    # 8. Итого к оплате
     itogo_k_oplate = k_perenum - logistics - storage - other_deductions - abs(fines) - abs(correction)
     
-    # Группировка по артикулам (только продажи)
-    sales_df = df[sales_mask]
+    # Артикулы
     articles_data = []
+    sales_df = df[sales_mask]
     
     if not sales_df.empty:
         grouped = sales_df.groupby(['Артикул поставщика', 'Название']).agg({
@@ -841,24 +835,20 @@ def parse_wb_report(df):
     df['Дата продажи'] = pd.to_datetime(df['Дата продажи'], errors='coerce')
     date_min = df['Дата продажи'].min()
     date_max = df['Дата продажи'].max()
-    period = "Период не определён"
-    if pd.notna(date_min) and pd.notna(date_max):
-        period = f"{date_min.strftime('%d.%m.%Y')} – {date_max.strftime('%d.%m.%Y')}"
-    
-    analysis_result = {
-        'revenue': float(revenue),
-        'k_perenum': float(k_perenum),
-        'logistics': float(logistics),
-        'storage': float(storage),
-        'other_deductions': float(other_deductions),
-        'fines': float(fines),
-        'correction': float(correction),
-        'itogo_k_oplate': float(itogo_k_oplate)
-    }
+    period = f"{date_min.strftime('%d.%m.%Y')} – {date_max.strftime('%d.%m.%Y')}" if pd.notna(date_min) and pd.notna(date_max) else "Период не определён"
     
     return {
         'period': period,
-        'analysis_result': analysis_result,
+        'analysis_result': {
+            'revenue': float(revenue),
+            'k_perenum': float(k_perenum),
+            'logistics': float(logistics),
+            'storage': float(storage),
+            'other_deductions': float(other_deductions),
+            'fines': float(fines),
+            'correction': float(correction),
+            'itogo_k_oplate': float(itogo_k_oplate)
+        },
         'articles_data': articles_data
     }
 

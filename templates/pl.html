@@ -131,7 +131,7 @@
                     <div class="compare-stats" id="period2Stats"></div>
                 </div>
                 <div class="compare-card difference-card">
-                    <h4>Разница (П2 - П1)</h4>
+                    <h4>Динамика (П2 - П1)</h4>
                     <div class="compare-stats" id="differenceStats"></div>
                 </div>
             </div>
@@ -701,10 +701,13 @@
             const period1Aggregated = {
                 count: selectedPeriods1.length,
                 report_period: selectedPeriods1.map(r => r.report_period).join(', '),
+                articles_total_revenue: selectedPeriods1.reduce((sum, r) => sum + (r.articles_total_revenue || 0), 0),
                 revenue: selectedPeriods1.reduce((sum, r) => sum + r.revenue, 0),
                 logistics: selectedPeriods1.reduce((sum, r) => sum + r.logistics, 0),
                 storage: selectedPeriods1.reduce((sum, r) => sum + r.storage, 0),
+                other_deductions: selectedPeriods1.reduce((sum, r) => sum + r.other_deductions, 0),
                 tax_amount: selectedPeriods1.reduce((sum, r) => sum + r.tax_amount, 0),
+                itogo_k_oplate: selectedPeriods1.reduce((sum, r) => sum + r.itogo_k_oplate, 0),
                 net_profit: selectedPeriods1.reduce((sum, r) => sum + r.net_profit, 0)
             };
             
@@ -712,25 +715,33 @@
             const period2Aggregated = {
                 count: selectedPeriods2.length,
                 report_period: selectedPeriods2.map(r => r.report_period).join(', '),
+                articles_total_revenue: selectedPeriods2.reduce((sum, r) => sum + (r.articles_total_revenue || 0), 0),
                 revenue: selectedPeriods2.reduce((sum, r) => sum + r.revenue, 0),
                 logistics: selectedPeriods2.reduce((sum, r) => sum + r.logistics, 0),
                 storage: selectedPeriods2.reduce((sum, r) => sum + r.storage, 0),
+                other_deductions: selectedPeriods2.reduce((sum, r) => sum + r.other_deductions, 0),
                 tax_amount: selectedPeriods2.reduce((sum, r) => sum + r.tax_amount, 0),
+                itogo_k_oplate: selectedPeriods2.reduce((sum, r) => sum + r.itogo_k_oplate, 0),
                 net_profit: selectedPeriods2.reduce((sum, r) => sum + r.net_profit, 0)
             };
             
+            // Формируем HTML для Периода 1
             period1Stats.innerHTML = `
                 <div class="stat">
                     <span class="stat-label">Отчетов:</span>
                     <span class="stat-value">${period1Aggregated.count}</span>
                 </div>
                 <div class="stat">
-                    <span class="stat-label">Периоды:</span>
+                    <span class="stat-label">Период:</span>
                     <span class="stat-value" style="font-size:0.7rem;">${escapeHtml(period1Aggregated.report_period)}</span>
                 </div>
                 <div class="stat">
-                    <span class="stat-label">Продажа:</span>
-                    <span class="stat-value">${formatMoney(period1Aggregated.revenue)}</span>
+                    <span class="stat-label">Общая выручка:</span>
+                    <span class="stat-value positive">${formatMoney(period1Aggregated.articles_total_revenue)}</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Продажа (WB):</span>
+                    <span class="stat-value positive">${formatMoney(period1Aggregated.revenue)}</span>
                 </div>
                 <div class="stat">
                     <span class="stat-label">Логистика:</span>
@@ -741,10 +752,18 @@
                     <span class="stat-value negative">${formatMoney(period1Aggregated.storage)}</span>
                 </div>
                 <div class="stat">
+                    <span class="stat-label">Реклама:</span>
+                    <span class="stat-value negative">${formatMoney(period1Aggregated.other_deductions)}</span>
+                </div>
+                <div class="stat">
                     <span class="stat-label">Налог:</span>
                     <span class="stat-value negative">${formatMoney(period1Aggregated.tax_amount)}</span>
                 </div>
-                <div class="stat">
+                <div class="stat divider">
+                    <span class="stat-label">Итого к оплате:</span>
+                    <span class="stat-value">${formatMoney(period1Aggregated.itogo_k_oplate)}</span>
+                </div>
+                <div class="stat profit-stat">
                     <span class="stat-label">Чистая прибыль:</span>
                     <span class="stat-value ${period1Aggregated.net_profit >= 0 ? 'positive' : 'negative'}">
                         ${formatMoney(period1Aggregated.net_profit)}
@@ -752,18 +771,23 @@
                 </div>
             `;
             
+            // Формируем HTML для Периода 2
             period2Stats.innerHTML = `
                 <div class="stat">
                     <span class="stat-label">Отчетов:</span>
                     <span class="stat-value">${period2Aggregated.count}</span>
                 </div>
                 <div class="stat">
-                    <span class="stat-label">Периоды:</span>
+                    <span class="stat-label">Период:</span>
                     <span class="stat-value" style="font-size:0.7rem;">${escapeHtml(period2Aggregated.report_period)}</span>
                 </div>
                 <div class="stat">
-                    <span class="stat-label">Продажа:</span>
-                    <span class="stat-value">${formatMoney(period2Aggregated.revenue)}</span>
+                    <span class="stat-label">Общая выручка:</span>
+                    <span class="stat-value positive">${formatMoney(period2Aggregated.articles_total_revenue)}</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Продажа (WB):</span>
+                    <span class="stat-value positive">${formatMoney(period2Aggregated.revenue)}</span>
                 </div>
                 <div class="stat">
                     <span class="stat-label">Логистика:</span>
@@ -774,10 +798,18 @@
                     <span class="stat-value negative">${formatMoney(period2Aggregated.storage)}</span>
                 </div>
                 <div class="stat">
+                    <span class="stat-label">Реклама:</span>
+                    <span class="stat-value negative">${formatMoney(period2Aggregated.other_deductions)}</span>
+                </div>
+                <div class="stat">
                     <span class="stat-label">Налог:</span>
                     <span class="stat-value negative">${formatMoney(period2Aggregated.tax_amount)}</span>
                 </div>
-                <div class="stat">
+                <div class="stat divider">
+                    <span class="stat-label">Итого к оплате:</span>
+                    <span class="stat-value">${formatMoney(period2Aggregated.itogo_k_oplate)}</span>
+                </div>
+                <div class="stat profit-stat">
                     <span class="stat-label">Чистая прибыль:</span>
                     <span class="stat-value ${period2Aggregated.net_profit >= 0 ? 'positive' : 'negative'}">
                         ${formatMoney(period2Aggregated.net_profit)}
@@ -785,15 +817,25 @@
                 </div>
             `;
             
+            // Вычисляем разницы
+            const diffArticlesRevenue = period2Aggregated.articles_total_revenue - period1Aggregated.articles_total_revenue;
             const diffRevenue = period2Aggregated.revenue - period1Aggregated.revenue;
             const diffLogistics = period2Aggregated.logistics - period1Aggregated.logistics;
             const diffStorage = period2Aggregated.storage - period1Aggregated.storage;
+            const diffOther = period2Aggregated.other_deductions - period1Aggregated.other_deductions;
             const diffTax = period2Aggregated.tax_amount - period1Aggregated.tax_amount;
+            const diffItogo = period2Aggregated.itogo_k_oplate - period1Aggregated.itogo_k_oplate;
             const diffProfit = period2Aggregated.net_profit - period1Aggregated.net_profit;
             
             differenceStats.innerHTML = `
                 <div class="stat">
-                    <span class="stat-label">Продажа:</span>
+                    <span class="stat-label">Общая выручка:</span>
+                    <span class="stat-value ${diffArticlesRevenue >= 0 ? 'positive' : 'negative'}">
+                        ${diffArticlesRevenue >= 0 ? '+' : ''}${formatMoney(diffArticlesRevenue)}
+                    </span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Продажа (WB):</span>
                     <span class="stat-value ${diffRevenue >= 0 ? 'positive' : 'negative'}">
                         ${diffRevenue >= 0 ? '+' : ''}${formatMoney(diffRevenue)}
                     </span>
@@ -811,12 +853,24 @@
                     </span>
                 </div>
                 <div class="stat">
+                    <span class="stat-label">Реклама:</span>
+                    <span class="stat-value ${diffOther <= 0 ? 'positive' : 'negative'}">
+                        ${diffOther >= 0 ? '+' : ''}${formatMoney(diffOther)}
+                    </span>
+                </div>
+                <div class="stat">
                     <span class="stat-label">Налог:</span>
                     <span class="stat-value ${diffTax <= 0 ? 'positive' : 'negative'}">
                         ${diffTax >= 0 ? '+' : ''}${formatMoney(diffTax)}
                     </span>
                 </div>
-                <div class="stat">
+                <div class="stat divider">
+                    <span class="stat-label">Итого к оплате:</span>
+                    <span class="stat-value ${diffItogo >= 0 ? 'positive' : 'negative'}">
+                        ${diffItogo >= 0 ? '+' : ''}${formatMoney(diffItogo)}
+                    </span>
+                </div>
+                <div class="stat profit-stat">
                     <span class="stat-label">Чистая прибыль:</span>
                     <span class="stat-value ${diffProfit >= 0 ? 'positive' : 'negative'}">
                         ${diffProfit >= 0 ? '+' : ''}${formatMoney(diffProfit)}
@@ -824,19 +878,65 @@
                 </div>
             `;
             
-            let conclusionText = '';
+            // Формируем вывод
+            let conclusionHtml = '';
+            
             if (diffProfit > 0) {
-                conclusionText = `Группа "Период 2" показала лучший результат на ${formatMoney(diffProfit)} по чистой прибыли. `;
-                if (diffRevenue > 0) conclusionText += `Выручка выросла на ${formatMoney(diffRevenue)}. `;
-                if (diffLogistics < 0) conclusionText += `Логистика снизилась на ${formatMoney(Math.abs(diffLogistics))}. `;
+                conclusionHtml += `<strong>Период 2</strong> показал лучший результат на <strong>${formatMoney(diffProfit)}</strong> по чистой прибыли.<br>`;
             } else if (diffProfit < 0) {
-                conclusionText = `Группа "Период 1" показала лучший результат на ${formatMoney(Math.abs(diffProfit))} по чистой прибыли. `;
+                conclusionHtml += `<strong>Период 1</strong> показал лучший результат на <strong>${formatMoney(Math.abs(diffProfit))}</strong> по чистой прибыли.<br>`;
             } else {
-                conclusionText = `Прибыль в обеих группах одинакова. `;
+                conclusionHtml += `Прибыль в обеих группах одинакова.<br>`;
             }
             
-            compareConclusion.innerHTML = conclusionText;
+            if (diffRevenue !== 0) {
+                const percent = period1Aggregated.revenue !== 0 ? (diffRevenue / period1Aggregated.revenue * 100).toFixed(1) : 0;
+                conclusionHtml += diffRevenue > 0 
+                    ? `Выручка выросла на <strong>${formatMoney(diffRevenue)}</strong> (${percent}%)<br>`
+                    : `Выручка снизилась на <strong>${formatMoney(Math.abs(diffRevenue))}</strong> (${Math.abs(percent)}%)<br>`;
+            }
+            
+            if (diffArticlesRevenue !== 0) {
+                conclusionHtml += diffArticlesRevenue > 0 
+                    ? `Общая выручка по артикулам выросла на <strong>${formatMoney(diffArticlesRevenue)}</strong><br>`
+                    : `Общая выручка по артикулам снизилась на <strong>${formatMoney(Math.abs(diffArticlesRevenue))}</strong><br>`;
+            }
+            
+            if (diffLogistics !== 0) {
+                conclusionHtml += diffLogistics < 0 
+                    ? `Логистика снизилась на <strong>${formatMoney(Math.abs(diffLogistics))}</strong><br>`
+                    : `Логистика выросла на <strong>${formatMoney(diffLogistics)}</strong><br>`;
+            }
+            
+            if (diffStorage !== 0) {
+                conclusionHtml += diffStorage < 0 
+                    ? `Хранение снизилось на <strong>${formatMoney(Math.abs(diffStorage))}</strong><br>`
+                    : `Хранение выросло на <strong>${formatMoney(diffStorage)}</strong><br>`;
+            }
+            
+            if (diffOther !== 0) {
+                conclusionHtml += diffOther < 0 
+                    ? `Расходы на рекламу снизились на <strong>${formatMoney(Math.abs(diffOther))}</strong><br>`
+                    : `Расходы на рекламу выросли на <strong>${formatMoney(diffOther)}</strong><br>`;
+            }
+            
+            if (diffTax !== 0) {
+                conclusionHtml += diffTax < 0 
+                    ? `Налог снизился на <strong>${formatMoney(Math.abs(diffTax))}</strong><br>`
+                    : `Налог вырос на <strong>${formatMoney(diffTax)}</strong><br>`;
+            }
+            
+            if (diffItogo !== 0) {
+                conclusionHtml += diffItogo > 0 
+                    ? `Итого к оплате увеличилось на <strong>${formatMoney(diffItogo)}</strong><br>`
+                    : `Итого к оплате уменьшилось на <strong>${formatMoney(Math.abs(diffItogo))}</strong><br>`;
+            }
+            
+            compareConclusion.innerHTML = conclusionHtml;
             compareResult.style.display = 'block';
+            
+            // Прокручиваем к результату
+            compareResult.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
         
         function setupFilters() {

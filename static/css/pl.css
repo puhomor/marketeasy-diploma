@@ -708,3 +708,56 @@ main {
     font-size: 0.85rem;
     text-align: right;
 }
+
+/* Дополнительные стили для сравнения */
+.stat.divider {
+    margin-top: 0.5rem;
+    padding-top: 0.5rem;
+    border-top: 2px solid #e5e7eb;
+}
+
+.stat.profit-stat {
+    margin-top: 0.5rem;
+    padding-top: 0.5rem;
+    border-top: 2px solid #e9d5ff;
+    background: #faf5ff;
+    margin-left: -0.5rem;
+    margin-right: -0.5rem;
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+    border-radius: 8px;
+}
+
+.stat-value.positive {
+    color: #16a34a;
+    font-weight: 700;
+}
+
+.stat-value.negative {
+    color: #dc2626;
+    font-weight: 700;
+}
+
+.compare-conclusion {
+    padding: 1rem 1.5rem;
+    background: #f3e8ff;
+    border-top: 1px solid #e9d5ff;
+    font-size: 0.9rem;
+    line-height: 1.6;
+}
+
+.compare-conclusion strong {
+    color: #7e22ce;
+}
+
+.difference-card {
+    background: #f0fdf4;
+}
+
+.difference-card h4 {
+    color: #166534;
+}
+
+.period1-card h4, .period2-card h4 {
+    color: #4c1d95;
+}

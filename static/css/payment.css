@@ -1,85 +1,139 @@
 /* payment.css — стили только для страницы оплаты */
 
-.payment-page {
-    background: #f8fafc;
-    min-height: 100vh;
-  }
-  
-  .payment-container {
-    padding-top: 140px;
-    padding-bottom: 100px;
-    text-align: center;
-  }
-  
-  .payment-container h1 {
-    font-size: 48px;
-    font-weight: 700;
-    color: #1e293b;
-    margin-bottom: 1rem;
-  }
-  
-  .payment-container h2 {
-    font-size: 36px;
-    color: #2e7d32;
-    margin: 2rem 0;
-  }
-  
-  .payment-container h2 span {
-    font-size: 20px;
-    color: #666;
-    font-weight: normal;
-  }
-  
-  .payment-note {
-    font-size: 18px;
-    color: #666;
-    margin-bottom: 3rem;
-    line-height: 1.6;
-  }
-  
-  .btn-payment {
-    display: inline-block;
-    background: #2e7d32;
-    color: white;
-    padding: 1.2rem 3rem;
-    font-size: 20px;
-    font-weight: 600;
-    border-radius: 50px;
-    text-decoration: none;
-    box-shadow: 0 8px 25px rgba(46, 125, 50, 0.3);
-    transition: all 0.3s;
-  }
-  
-  .btn-payment:hover {
-    background: #256f2a;
-    transform: translateY(-4px);
-    box-shadow: 0 12px 30px rgba(46, 125, 50, 0.4);
-  }
-  
-  .back-link {
-    display: inline-block;
-    margin-top: 3rem;
-    color: #666;
-    font-size: 16px;
-    text-decoration: none;
-  }
-  
-  .back-link:hover {
-    text-decoration: underline;
-  }
-  
-  /* Адаптив */
-  @media (max-width: 768px) {
-    .payment-container h1 {
-      font-size: 36px;
-    }
-    
-    .payment-container h2 {
-      font-size: 30px;
-    }
-    
-    .btn-payment {
-      padding: 1rem 2.5rem;
-      font-size: 18px;
-    }
-  }
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+body.payment-page {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background: #f8fafc;
+}
+
+.payment-container {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 80px 20px;
+}
+
+.payment-card {
+  max-width: 500px;
+  width: 100%;
+  background: white;
+  border-radius: 24px;
+  text-align: center;
+  padding: 48px 40px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+.payment-icon {
+  margin-bottom: 24px;
+  color: #2e7d32;
+}
+
+.payment-card h1 {
+  font-size: 32px;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0 0 16px 0;
+}
+
+.tariff-badge {
+  display: inline-block;
+  background: #e8f5e9;
+  color: #2e7d32;
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 24px;
+}
+
+.price {
+  font-size: 48px;
+  font-weight: 700;
+  color: #2e7d32;
+  margin-bottom: 32px;
+}
+
+.price span {
+  font-size: 18px;
+  color: #6b7280;
+  font-weight: normal;
+}
+
+.payment-info {
+  background: #f9fafb;
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 32px;
+  text-align: left;
+}
+
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 0;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.info-row:last-child {
+  border-bottom: none;
+}
+
+.info-label {
+  color: #6b7280;
+  font-size: 14px;
+}
+
+.info-value {
+  color: #1e293b;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.payment-note {
+  font-size: 14px;
+  color: #9ca3af;
+  margin-bottom: 32px;
+  line-height: 1.5;
+}
+
+.btn-payment {
+  display: block;
+  width: 100%;
+  background: #2e7d32;
+  color: white;
+  padding: 14px 24px;
+  font-size: 16px;
+  font-weight: 600;
+  border-radius: 12px;
+  text-decoration: none;
+  text-align: center;
+  box-sizing: border-box;
+}
+
+.payment-footer {
+  margin-top: 24px;
+}
+
+.back-link {
+  color: #6b7280;
+  font-size: 14px;
+  text-decoration: none;
+}
+
+.back-nav-link {
+  color: #4b5563;
+  text-decoration: none;
+  font-size: 14px;
+}
+
+.footer {
+  margin-top: 0;
+}
